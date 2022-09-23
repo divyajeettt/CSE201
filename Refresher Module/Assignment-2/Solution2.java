@@ -68,7 +68,7 @@ class LinkedList {
 }
 
 
-public class Question2 {
+public class Solution2 {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
 
