@@ -1,7 +1,7 @@
 import java.util.*;
 
 
-public class Question3 {
+public class Solution3 {
     static boolean isInt(double x) {
         int integerPart = (int)x;
         double remaining = x - integerPart;
