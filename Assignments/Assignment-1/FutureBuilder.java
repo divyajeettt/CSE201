@@ -1,4 +1,5 @@
 import java.util.*;
+import java.lang.Math;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -11,8 +12,8 @@ class Student {
     private String status;
     private float currentCTC;                   // Package currently held by the Student
     private ArrayList<Company> applications;    // List of Companies the Student has applied to
-    private Company offer;                      // Company with the higher CTC that has offered to the Student
-    private Company placedAt;                   // Company where the Student is currently placed at
+    private Company offer;                      // Company with the higher CTC that Student is placed in
+    // private Company placedAt;                   // Company where the Student is currently placed at
 
     public Student(String name, long roll, float cgpa, String branch) {
         this.name = name;
@@ -23,7 +24,7 @@ class Student {
         this.status = "Not Applied";
         this.applications = new ArrayList<Company>();
         this.offer = null;
-        this.placedAt = null;
+        // this.placedAt = null;
     }
 
     public String toString() {
@@ -63,10 +64,6 @@ class Student {
         this.applications.add(company);
     }
 
-    public boolean matches(String name, long roll) {
-        return (this.name.equals(name) && this.roll == roll);
-    }
-
     public boolean appliedTo(Company company) {
         return this.applications.contains(company);
     }
@@ -80,17 +77,13 @@ class Student {
     }
 
     public void getCurrentStatus() {
-        if (this.status.equals("Blocked"))
-            System.out.println("You are Blocked from further rounds of the Placement Drive!");
-        else if (this.status.equals("Applied") || this.status.equals("Not Applied"))
+        if (this.status.equals("Applied") || this.status.equals("Not Applied"))
             System.out.println("You are Un-offered by any Company as of yet!");
-        else if (this.status.equals("Offered")) {
-            System.out.println("You have an Offer from " + this.offer + "! Details of the offer are as follows:");
-            this.offer.offerDetails();
-        }
+        else if (this.status.equals("Blocked"))
+            System.out.println("You are Blocked from further rounds of the Placement Drive!");
         else {
-            System.out.println("You are currently Placed at " + this.placedAt + "! Details of the placement are as follows:");
-            this.placedAt.offerDetails();
+            System.out.println("You are Offered from " + this.offer + "! Details of the offer are as follows:");
+            this.offer.offerDetails();
         }
     }
 
@@ -98,12 +91,12 @@ class Student {
         if (this.offer == null)
             System.out.println("You currently do not have any Offers to accept!");
         else {
-            Company offer = this.offer;
             System.out.printf("Congratulations " + this.name + "! You have accepted the offer from, and are now ");
-            System.out.printf("placed at " + offer.getName() + "with a package of " + offer.getCTC() + "LPA!");
-            this.placedAt = this.offer;
+            System.out.printf("placed at " + this.offer.getName() + "with a package of " + this.offer.getCTC() + "LPA!");
+            this.status = "Offered";
+            // this.placedAt = this.offer;
             this.currentCTC = this.offer.getCTC();
-            offer.addPlaced(this);
+            this.offer.addPlaced(this);
         }
     }
 
@@ -111,8 +104,7 @@ class Student {
         if (this.offer == null)
             System.out.println("You currently do not have any Offers to reject!");
         else {
-            Company offer = this.offer;
-            System.out.println("You have rejected an Offer of " + offer.getCTC() + " LPA from " + offer.getName()+ "!");
+            System.out.println("You have rejected an Offer of " + this.offer.getCTC() + " LPA from " + this.offer.getName()+ "!");
             System.out.println("You're now being Blocked from participating in further rounds of the Placement Drive");
             this.status = "Blocked";
         }
@@ -127,7 +119,7 @@ class Company {
     private float cgpaCriteria;
     private ArrayList<Student> applicants;    // List of Students who have applied to the Company
     private ArrayList<Student> offerings;     // List of Students that the Company has Offered to
-    private ArrayList<Student> placed;        // List of Students who are placed at the Company
+    // private ArrayList<Student> placed;        // List of Students who are placed at the Company
 
     public Company(String name, String role, float ctc, float cgpaCriteria) {
         this.name = name;
@@ -136,7 +128,7 @@ class Company {
         this.cgpaCriteria = cgpaCriteria;
         this.applicants = new ArrayList<Student>();
         this.offerings = new ArrayList<Student>();
-        this.placed = new ArrayList<Student>();
+        // this.placed = new ArrayList<Student>();
     }
 
     public String toString() {
@@ -181,7 +173,12 @@ class Company {
         return this.offerings.contains(student);
     }
 
-    public void getSelectedStudents() {}
+    public void getSelectedStudents() {
+        for (Student applicant: this.applicants) {
+            if (Math.random() >= 0.5)
+                this.offerings.add(applicant)
+        }
+    }
 
     public void updateRole(String newRole) {
         this.role = newRole;
@@ -226,6 +223,10 @@ class InstitutePlacementCell {
         return this.companies;
     }
 
+    public ArrayList<Company> getRegisteredCompanies() {
+        return this.registeredCompanies;
+    }
+
     public void setStudentStart(LocalDateTime dateTime) {
         this.studentStart = dateTime;
     }
@@ -240,10 +241,6 @@ class InstitutePlacementCell {
 
     public void setCompanyEnd(LocalDateTime dateTime) {
         this.companyEnd = dateTime;
-    }
-
-    public ArrayList<Company> getRegisteredCompanies() {
-        return this.registeredCompanies;
     }
 
     public Company idCompany(String name) {
@@ -328,11 +325,11 @@ class InstitutePlacementCell {
 
     public void openStudentRegistrations() {
         // Student Registrations can only be opened if Company Registrations have been completed
-        if (companyRegsOngoing) {
+        if (this.companyRegsOngoing) {
             System.out.println("Company Registrations are currently going on!");
             System.out.println("Student Registrations must be started after Company Registrations have ended!");
         }
-        else if (!companyRegsOver) {
+        else if (!this.companyRegsOver) {
             System.out.println("Company Registrations have not been completed yet!");
             System.out.println("Student Registrations must be started after Company Registrations have ended!");
         }
@@ -374,7 +371,7 @@ class InstitutePlacementCell {
             String status = student.getStatus();
             unOffered += (status.equals("Applied") || status.equals("Not Applied")) ? 1 : 0;
             blocked += status.equals("Blocked") ? 1 : 0;
-            offered += (status.equals("Offered") || status.equals("Placed")) ? 1 : 0;
+            offered += (status.equals("Offered") ? 1 : 0;
         }
 
         System.out.println("Un-offered students: " + unOffered);
@@ -383,7 +380,7 @@ class InstitutePlacementCell {
         System.out.println("Details of the Offered students are as follows:");
 
         for (Student student: this.registeredStudents) {
-            if (student.getStatus().equals("offered"))
+            if (student.getStatus().equals("Offered"))
                 System.out.println(student);
         }
     }
@@ -423,13 +420,13 @@ class InstitutePlacementCell {
         int placed = 0;
         for (Student student: this.registeredStudents) {
             String status = student.getStatus();
-            if (status.equals("Offered") || status.equals("Placed")) {
+            if (status.equals("Offered")) {
                 average += student.getCurrentCTC();
                 placed ++;
             }
         }
         average /= placed;
-        System.out.println("Average Package offered to students of " + this.name + ": " + average);
+        System.out.println("Average Package (in LPA) offered to students of " + this.name + ": " + average);
     }
 
     public void getCompanyProcessResults(String name) {
@@ -437,12 +434,12 @@ class InstitutePlacementCell {
         if (company == null)
             return;
 
-        ArrayList<Student> offers = company.getOfferings();
-        if (offers == null)
+        company.getSelectedStudents();
+        if (offers == company.getOfferings())
             System.out.println(name + " has not selected any students!");
         else {
             System.out.println(name + " has selected the following students:");
-            for (Student student: offers)
+            for (Student student: company.getOfferings())
                 System.out.println(student.getRoll() + ": " + student.getName());
         }
     }
