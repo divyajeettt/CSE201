@@ -65,13 +65,13 @@ class Student {
         this.currentOffer.addAccepted(this);
     }
 
-    public void getOffered(Company company) {
-        if (this.currentOffer == null || company.getCTC() >= 3*this.currentOffer.getCTC())
-            this.currentOffer = company;
-    }
-
     public void addApplication(Company company) {
         this.applications.add(company);
+    }
+
+    public void processOffer(Company company) {
+        if (this.currentOffer == null || company.getCTC() >= 3*this.currentOffer.getCTC())
+            this.currentOffer = company;
     }
 
     public boolean appliedTo(Company company) {
@@ -105,7 +105,7 @@ class Student {
         else {
             this.setOffer();
             System.out.print("Congratulations " + this.name + "! You have accepted the offer from, and are now ");
-            System.out.println("placed at " + this.currentOffer.getName() + "with a package of " + this.currentOffer.getCTC() + "LPA!");
+            System.out.println("placed at " + this.currentOffer.getName() + " with a package of " + this.currentOffer.getCTC() + " LPA!");
         }
     }
 
@@ -181,9 +181,9 @@ class Company {
         if (this.applicants == null)
             System.out.println(this.name + " has no Applicants!");
         for (Student applicant: this.applicants) {
-            if (Math.random() >= 0.75 && applicant.getCurrentCTC() < this.ctc) {
+            if (Math.random() >= 0.95 && applicant.getCurrentCTC() < this.ctc) {
                 this.offerings.add(applicant);
-                applicant.getOffered(this);
+                applicant.processOffer(this);
             }
         }
     }
@@ -384,7 +384,7 @@ class InstitutePlacementCell {
             for (Student student: this.registeredStudents) {
                 if (student.getStatus().equals("Offered")) {
                     System.out.print(student.getRoll() + ": " + student.getName() + " offered from ");
-                    System.out.println(student.getCurrentOffer() + " with " + student.getCurrentCTC() + "LPA");
+                    System.out.println(student.getCurrentOffer().getName() + " with " + student.getCurrentCTC() + "LPA");
                 }
             }
         }
@@ -415,7 +415,7 @@ class InstitutePlacementCell {
             return;
         System.out.println("The Company details are as follows:");
         System.out.println(company);
-        if (company.getOfferings() == null)
+        if (company.getOfferings().size() == 0)
             System.out.println(company.getName() + " has not offered to any Student!");
         else {
             System.out.println(company.getName() + " has offered to the following Students:");
