@@ -10,21 +10,17 @@ class Student {
     private float cgpa;
     private final String branch;
     private String status;
-    private float currentCTC;                   // Package currently held by the Student
     private ArrayList<Company> applications;    // List of Companies the Student has applied to
-    private Company offer;                      // Company with the higher CTC that Student is placed in
-    // private Company placedAt;                   // Company where the Student is currently placed at
+    private Company currentOffer;               // Company with the higher CTC that Student is currently placed in
 
     public Student(String name, long roll, float cgpa, String branch) {
         this.name = name;
         this.roll = roll;
         this.cgpa = cgpa;
         this.branch = branch;
-        this.currentCTC = 0.0f;
         this.status = "Not Applied";
-        this.applications = new ArrayList<Company>();
-        this.offer = null;
-        // this.placedAt = null;
+        this.applications = new ArrayList<>();
+        this.currentOffer = null;
     }
 
     public String toString() {
@@ -44,12 +40,16 @@ class Student {
         return this.roll;
     }
 
-    public float getCurrentCTC() {
-        return this.currentCTC;
-    }
-
     public String getStatus() {
         return this.status;
+    }
+
+    public Company getCurrentOffer() {
+        return this.currentOffer;
+    }
+
+    public float getCurrentCTC() {
+        return (this.currentOffer == null) ? 0.0f : this.currentOffer.getCTC();
     }
 
     public void setStatus(String status) {
@@ -58,6 +58,16 @@ class Student {
 
     public void setCGPA(float cgpa) {
         this.cgpa = cgpa;
+    }
+
+    public void setOffer() {
+        this.status = "Offered";
+        this.currentOffer.addAccepted(this);
+    }
+
+    public void getOffered(Company company) {
+        if (this.currentOffer == null || company.getCTC() >= 3*this.currentOffer.getCTC())
+            this.currentOffer = company;
     }
 
     public void addApplication(Company company) {
@@ -69,11 +79,12 @@ class Student {
     }
 
     public boolean isEligible(Company company) {
-        return (
-            !this.status.equals("Placed")
-            && this.cgpa >= company.getCGPA()
-            && company.getCTC() >= 3*this.currentCTC
-        );
+        if (this.status.equals("Blocked"))
+            return false;
+        else if (currentOffer == null)
+            return this.cgpa >= company.getCGPA();
+        else
+            return this.cgpa >= company.getCGPA() && company.getCTC() >= 3*this.currentOffer.getCTC();
     }
 
     public void getCurrentStatus() {
@@ -82,29 +93,27 @@ class Student {
         else if (this.status.equals("Blocked"))
             System.out.println("You are Blocked from further rounds of the Placement Drive!");
         else {
-            System.out.println("You are Offered from " + this.offer + "! Details of the offer are as follows:");
-            this.offer.offerDetails();
+            System.out.println("You are Offered from " + this.currentOffer.getName() + "! Details of the offer are as follows:");
+            System.out.println("Name of Company: " + this.currentOffer.getName());
+            System.out.println("Offered CTC: " + this.currentOffer.getCTC() + " LPA");
         }
     }
 
     public void accept() {
-        if (this.offer == null)
+        if (this.currentOffer == null)
             System.out.println("You currently do not have any Offers to accept!");
         else {
-            System.out.printf("Congratulations " + this.name + "! You have accepted the offer from, and are now ");
-            System.out.printf("placed at " + this.offer.getName() + "with a package of " + this.offer.getCTC() + "LPA!");
-            this.status = "Offered";
-            // this.placedAt = this.offer;
-            this.currentCTC = this.offer.getCTC();
-            this.offer.addPlaced(this);
+            this.setOffer();
+            System.out.print("Congratulations " + this.name + "! You have accepted the offer from, and are now ");
+            System.out.println("placed at " + this.currentOffer.getName() + "with a package of " + this.currentOffer.getCTC() + "LPA!");
         }
     }
 
     public void reject() {
-        if (this.offer == null)
+        if (this.currentOffer == null)
             System.out.println("You currently do not have any Offers to reject!");
         else {
-            System.out.println("You have rejected an Offer of " + this.offer.getCTC() + " LPA from " + this.offer.getName()+ "!");
+            System.out.println("You have rejected an Offer of " + this.currentOffer.getCTC() + " LPA from " + this.currentOffer.getName()+ "!");
             System.out.println("You're now being Blocked from participating in further rounds of the Placement Drive");
             this.status = "Blocked";
         }
@@ -119,16 +128,16 @@ class Company {
     private float cgpaCriteria;
     private ArrayList<Student> applicants;    // List of Students who have applied to the Company
     private ArrayList<Student> offerings;     // List of Students that the Company has Offered to
-    // private ArrayList<Student> placed;        // List of Students who are placed at the Company
+    private ArrayList<Student> accepted;      // List of Students that have accepted the Company's offer
 
     public Company(String name, String role, float ctc, float cgpaCriteria) {
         this.name = name;
         this.role = role;
         this.ctc = ctc;
         this.cgpaCriteria = cgpaCriteria;
-        this.applicants = new ArrayList<Student>();
-        this.offerings = new ArrayList<Student>();
-        // this.placed = new ArrayList<Student>();
+        this.applicants = new ArrayList<>();
+        this.offerings = new ArrayList<>();
+        this.accepted = new ArrayList<>();
     }
 
     public String toString() {
@@ -160,13 +169,8 @@ class Company {
         this.applicants.add(student);
     }
 
-    public void addPlaced(Student student) {
-        this.placed.add(student);
-    }
-
-    public void offerDetails() {
-        System.out.println("Offered Role: " + this.role);
-        System.out.println("Offered CTC (in LPA): " + this.ctc);
+    public void addAccepted(Student student) {
+        this.accepted.add(student);
     }
 
     public boolean offeredTo(Student student) {
@@ -174,20 +178,29 @@ class Company {
     }
 
     public void getSelectedStudents() {
+        if (this.applicants == null)
+            System.out.println(this.name + " has no Applicants!");
         for (Student applicant: this.applicants) {
-            if (Math.random() >= 0.5)
-                this.offerings.add(applicant)
+            if (Math.random() >= 0.75 && applicant.getCurrentCTC() < this.ctc) {
+                this.offerings.add(applicant);
+                applicant.getOffered(this);
+            }
         }
     }
 
     public void updateRole(String newRole) {
         this.role = newRole;
+        System.out.println(this.name + "'s offered Role successfully updated to " + newRole);
     }
+
     public void updateCTC(float newCTC) {
         this.ctc = newCTC;
+        System.out.println(this.name + "'s offered CTC successfully updated to " + newCTC + " LPA");
     }
+
     public void updateCGPACriteria(float newCGPA) {
         this.cgpaCriteria = newCGPA;
+        System.out.println(this.name + "'s CGPA Criteria successfully updated to " + newCGPA);
     }
 }
 
@@ -198,8 +211,6 @@ class InstitutePlacementCell {
     private ArrayList<Company> companies;              // Supreme list of all Companies in existence
     private ArrayList<Student> registeredStudents;     // List of Students who registered for the Placement Drive
     private ArrayList<Company> registeredCompanies;    // List of Companies who registered for the Placement Drive
-    private boolean companyRegsOngoing;                // Boolean to check if company Registrations are in process
-    private boolean companyRegsOver;                   // Boolean to check if company Registrations are over
     private LocalDateTime studentStart;                // Start DateTime of Student Registrations
     private LocalDateTime companyStart;                // Start DateTime of Company Registrations
     private LocalDateTime studentEnd;                  // End DateTime of Student Registrations
@@ -207,12 +218,10 @@ class InstitutePlacementCell {
 
     public InstitutePlacementCell(String name) {
         this.name = name;
-        this.companyRegsOngoing = false;
-        this.companyRegsOver = false;
-        this.students = new ArrayList<Student>();
-        this.companies = new ArrayList<Company>();
-        this.registeredStudents = new ArrayList<Student>();
-        this.registeredCompanies = new ArrayList<Company>();
+        this.students = new ArrayList<>();
+        this.companies = new ArrayList<>();
+        this.registeredStudents = new ArrayList<>();
+        this.registeredCompanies = new ArrayList<>();
     }
 
     public String getName() {
@@ -223,28 +232,8 @@ class InstitutePlacementCell {
         return this.companies;
     }
 
-    public ArrayList<Company> getRegisteredCompanies() {
-        return this.registeredCompanies;
-    }
-
-    public void setStudentStart(LocalDateTime dateTime) {
-        this.studentStart = dateTime;
-    }
-
-    public void setStudentEnd(LocalDateTime dateTime) {
-        this.studentEnd = dateTime;
-    }
-
-    public void setCompanyStart(LocalDateTime dateTime) {
-        this.companyStart = dateTime;
-    }
-
-    public void setCompanyEnd(LocalDateTime dateTime) {
-        this.companyEnd = dateTime;
-    }
-
     public Company idCompany(String name) {
-        for (Company company: this.registeredCompanies) {
+        for (Company company: this.companies) {
             if (name.equals(company.getName()))
                 return company;
         }
@@ -253,7 +242,7 @@ class InstitutePlacementCell {
     }
 
     public Student idStudent(String name, long roll) {
-        for (Student student: this.registeredStudents) {
+        for (Student student: this.students) {
             if (student.getRoll() == roll && name.equals(student.getName()))
                 return student;
         }
@@ -266,21 +255,26 @@ class InstitutePlacementCell {
     }
 
     public void registerStudent(Student student, LocalDateTime regDateTime) {
-        if (!regDateTime.isAfter(this.studentStart))
+        if (this.studentStart == null)
             System.out.println("The Student Registrations for the Placement Drive have not started yet!");
         else if (!regDateTime.isBefore(this.studentEnd))
             System.out.println("The Student Registrations for the Placement Drive have ended!");
         else {
-            System.out.println(student.getName() + "Registered for Placement Drive successfully! Their details are:");
+            System.out.println(student.getName() + " registered for the Placement Drive successfully! Their details are:");
             System.out.println(student);
             this.registeredStudents.add(student);
         }
+    }
+
+    public boolean isRegistered(Student student) {
+        return this.registeredStudents.contains(student);
     }
 
     public void apply(Student student, Company company) {
         company.addApplicant(student);
         student.addApplication(company);
         student.setStatus("Applied");
+        System.out.println("You have successfully applied to " + company.getName() + "!");
     }
 
     public void getAvailableCompanies(Student student) {
@@ -317,35 +311,42 @@ class InstitutePlacementCell {
         else if (!regDateTime.isBefore(this.companyEnd))
             System.out.println("The Company Registrations for the Placement Drive have ended!");
         else {
-            System.out.println(company.getName() + "Registered for Placement Drive successfully! Its details are:");
+            System.out.println(company.getName() + " registered for the Placement Drive successfully! Its details are:");
             System.out.println(company);
             this.registeredCompanies.add(company);
         }
     }
 
     public void openStudentRegistrations() {
-        // Student Registrations can only be opened if Company Registrations have been completed
-        if (this.companyRegsOngoing) {
-            System.out.println("Company Registrations are currently going on!");
-            System.out.println("Student Registrations must be started after Company Registrations have ended!");
-        }
-        else if (!this.companyRegsOver) {
-            System.out.println("Company Registrations have not been completed yet!");
-            System.out.println("Student Registrations must be started after Company Registrations have ended!");
-        }
-        else {
-            System.out.println(this.name + " is Open for Student Registrations for the Placement Drive!");
-            FutureBuilder.setDateTime(0, this);
-            this.companyRegsOngoing = false;
-            this.companyRegsOver = true;
+
+        if (this.companyEnd == null) {
+            System.out.println("Student Registrations can only be opened after Company Registrations have ended");
+        } else {
+            System.out.println("Please fill out the following details (" + FutureBuilder.format + ")");
+            System.out.print("Set the Opening time: ");
+            LocalDateTime tempDate = FutureBuilder.parseDateTime();
+            if (tempDate.isBefore(this.companyEnd)) {
+                System.out.println("Student Registrations can only be opened after Company Registrations have ended");
+            } else {
+                this.studentStart = tempDate;
+                System.out.print("Set the Closing time: ");
+                this.studentEnd = FutureBuilder.parseDateTime();
+                System.out.println(this.name + " is Open for Student Registrations for the Placement Drive!");
+            }
         }
     }
 
     public void openCompanyRegistrations() {
-        // Company Registrations must be completed before Student Registrations
-        System.out.println(this.name + " is Open for Company Registrations for the Placement Drive!");
-        FutureBuilder.setDateTime(1, this);
-        this.companyRegsOngoing = true;
+        if (this.companyStart != null) {
+            System.out.println("Company Registrations for the Placement Drive had already been opened!");
+        } else {
+            System.out.println("Please fill out the following details (" + FutureBuilder.format + ")");
+            System.out.print("Set the Opening time: ");
+            this.companyStart = FutureBuilder.parseDateTime();
+            System.out.print("Set the Closing time: ");
+            this.companyEnd = FutureBuilder.parseDateTime();
+            System.out.println(this.name + " is Open for Company Registrations for the Placement Drive!");
+        }
     }
 
     public void getNumberOfStudents() {
@@ -371,17 +372,21 @@ class InstitutePlacementCell {
             String status = student.getStatus();
             unOffered += (status.equals("Applied") || status.equals("Not Applied")) ? 1 : 0;
             blocked += status.equals("Blocked") ? 1 : 0;
-            offered += (status.equals("Offered") ? 1 : 0;
+            offered += status.equals("Offered") ? 1 : 0;
         }
 
         System.out.println("Un-offered students: " + unOffered);
         System.out.println("Blocked students: " + blocked);
         System.out.println("Offered students: " + offered);
-        System.out.println("Details of the Offered students are as follows:");
 
-        for (Student student: this.registeredStudents) {
-            if (student.getStatus().equals("Offered"))
-                System.out.println(student);
+        if (offered != 0) {
+            System.out.println("Details of the Offered students are as follows:");
+            for (Student student: this.registeredStudents) {
+                if (student.getStatus().equals("Offered")) {
+                    System.out.print(student.getRoll() + ": " + student.getName() + " offered from ");
+                    System.out.println(student.getCurrentOffer() + " with " + student.getCurrentCTC() + "LPA");
+                }
+            }
         }
     }
 
@@ -389,17 +394,18 @@ class InstitutePlacementCell {
         Student student = idStudent(name, roll);
         if (student == null)
             return;
-
+        System.out.println("The Student details are as follows:");
+        System.out.println(student);
         for (Company company: this.registeredCompanies) {
-            String cName = company.getName();
-            if (student.appliedTo(company))
-                System.out.println(name + " applied to " + cName);
-            else
-                System.out.println(name + " did not apply to " + cName);
-            if (company.offeredTo(student))
-                System.out.println(cName + " offered to " + name);
-            else
-                System.out.println(cName + " did not offer to " + name);
+            if (!student.appliedTo(company))
+                System.out.println(name + " did not apply to " + company.getName());
+            else {
+                System.out.println(name + " applied to " + company.getName());
+                if (company.offeredTo(student))
+                    System.out.println(company.getName() + " offered to " + name);
+                else
+                    System.out.println(company.getName() + " did not offer to " + name);
+            }
         }
     }
 
@@ -407,12 +413,15 @@ class InstitutePlacementCell {
         Company company = idCompany(name);
         if (company == null)
             return;
-
-        System.out.println("The company details are as follows:");
+        System.out.println("The Company details are as follows:");
         System.out.println(company);
-        System.out.println(company.getName() + " has offered to the following students:");
-        for (Student student: company.getOfferings())
-            System.out.println(student);
+        if (company.getOfferings() == null)
+            System.out.println(company.getName() + " has not offered to any Student!");
+        else {
+            System.out.println(company.getName() + " has offered to the following Students:");
+            for (Student student: company.getOfferings())
+                System.out.println(student.getRoll() + ": " + student.getName());
+        }
     }
 
     public void getAveragePackage() {
@@ -425,8 +434,12 @@ class InstitutePlacementCell {
                 placed ++;
             }
         }
-        average /= placed;
-        System.out.println("Average Package (in LPA) offered to students of " + this.name + ": " + average);
+        if (placed == 0)
+            System.out.println("No students are currently placed! Cannot calculate Average Package!");
+        else {
+            average /= placed;
+            System.out.println("Average Package (in LPA) offered to students of " + this.name + ": " + average);
+        }
     }
 
     public void getCompanyProcessResults(String name) {
@@ -435,7 +448,7 @@ class InstitutePlacementCell {
             return;
 
         company.getSelectedStudents();
-        if (offers == company.getOfferings())
+        if (company.getOfferings() == null)
             System.out.println(name + " has not selected any students!");
         else {
             System.out.println(name + " has selected the following students:");
@@ -447,39 +460,26 @@ class InstitutePlacementCell {
 
 
 public class FutureBuilder {
-    private static DateTimeFormatter format;    // DateTime format specifier
+    private static final Scanner input = new Scanner(System.in);
+    public static final String format = "dd-MM-yyyy_HH:mm";
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
 
     private static int inputChoice(int upper) {
-        Scanner input = new Scanner(System.in);
-        System.out.printf(">>> ");
+        System.out.print(">>> ");
         int choice = input.nextInt();
         while (!(1 <= choice && choice <= upper)) {
             System.out.println("Please enter a number between 1 - " + upper);
-            System.out.printf(">>> ");
+            System.out.print(">>> ");
             choice = input.nextInt();
         }
         return choice;
     }
 
-    public static void setDateTime(int type, InstitutePlacementCell placeCom) {
-        Scanner input = new Scanner(System.in);
-        System.out.println("Please fill out the following details (" + format + ")");
-
-        System.out.printf("Set the Opening time: ");
-        if (type == 0)
-            placeCom.setStudentStart(LocalDateTime.parse(input.nextLine(), format));
-        else
-            placeCom.setCompanyStart(LocalDateTime.parse(input.nextLine(), format));
-
-        System.out.printf("Set the Closing time: ");
-        if (type == 0)
-            placeCom.setStudentEnd(LocalDateTime.parse(input.nextLine(), format));
-        else
-            placeCom.setCompanyEnd(LocalDateTime.parse(input.nextLine(), format));
+    public static LocalDateTime parseDateTime() {
+        return LocalDateTime.parse(input.next(), formatter);
     }
 
     private static void studentMode(InstitutePlacementCell placeCom) {
-        Scanner input = new Scanner(System.in);
         System.out.println("Welcome to the Student Mode!");
 
         while (true) {
@@ -490,28 +490,30 @@ public class FutureBuilder {
             int choice = inputChoice(3);
 
             if (choice == 1) {
-                System.out.println("Enter the number of students to add: ");
+                System.out.print("Enter the number of students to add: ");
                 int num = input.nextInt();
                 if (num <= 0) {
                     System.out.println("Invalid input!");
                     continue;
                 }
+                input.nextLine();
                 for (int i=0; i < num; i++) {
                     System.out.println("Enter the Student's Name, Roll Number, CGPA, and Branch (in order):");
                     String name = input.nextLine();
                     long roll = input.nextLong();
                     float cgpa = input.nextFloat();
+                    input.nextLine();
                     String branch = input.nextLine();
                     placeCom.addStudent(new Student(name, roll, cgpa, branch));
                     System.out.println("Student " + name + " added successfully!");
                 }
             }
             else if (choice == 2) {
+                input.nextLine();
                 System.out.println("Enter the Student's Name and Roll Number (in order): ");
                 String name = input.nextLine();
                 long roll = input.nextLong();
-                Student student = placeCom.idStudent(name, roll);
-                studentLogin(placeCom, student);
+                studentLogin(placeCom, placeCom.idStudent(name, roll));
             }
             else {
                 System.out.println("Thanks for using the Student Mode!");
@@ -524,7 +526,6 @@ public class FutureBuilder {
         if (student == null)
             return;
 
-        Scanner input = new Scanner(System.in);
         System.out.println("Welcome " + student.getName() + "!");
 
         while (true) {
@@ -533,28 +534,31 @@ public class FutureBuilder {
             System.out.println("2. Register for a Company");
             System.out.println("3. Get a list of all available Companies");
             System.out.println("4. Get current status");
-            System.out.println("5. Request to Update CGPA");
+            System.out.println("5. Request " + placeCom.getName() + " to Update CGPA");
             System.out.println("6. Accept the latest offer");
             System.out.println("7. Reject the latest offer");
             System.out.println("8. Back");
             int choice = inputChoice(8);
 
             if (choice == 1) {
-                System.out.printf("Enter the date and time of registration (dd-mm-yyyy hh:mm aa): ");
-                placeCom.registerStudent(student, LocalDateTime.parse(input.nextLine(), format));
+                System.out.print("Enter the date and time of registration (" + format + "): ");
+                placeCom.registerStudent(student, LocalDateTime.parse(input.next(), formatter));
             }
             else if (choice == 2) {
-                System.out.printf("Enter name of the Company you want to register for: ");
-                String companyName = input.nextLine();
-                for (Company company: placeCom.getRegisteredCompanies()) {
-                    if (companyName.equals(company.getName())) {
-                        if (student.isEligible(company))
-                            placeCom.apply(student, company);
-                        else
-                            System.out.println("You are not eligible to apply to " + companyName);
-                        break;
-                    }
+                if (!placeCom.isRegistered(student)) {
+                    System.out.println("You cannot register for Company before registering for the Placement Drive!");
+                    continue;
                 }
+                input.nextLine();
+                System.out.print("Enter name of the Company you want to register for: ");
+                String companyName = input.nextLine();
+                Company company = placeCom.idCompany(companyName);
+                if (company == null)
+                    continue;
+                else if (student.isEligible(company))
+                    placeCom.apply(student, company);
+                else
+                    System.out.println("You are not eligible to apply to " + companyName + "!");
             }
             else if (choice == 3) {
                 placeCom.getAvailableCompanies(student);
@@ -563,7 +567,7 @@ public class FutureBuilder {
                 student.getCurrentStatus();
             }
             else if (choice == 5) {
-                System.out.println("Please enter the Updated CGPA: ");
+                System.out.print("Please enter the Updated CGPA: ");
                 placeCom.updateCGPA(student, input.nextFloat());
             }
             else if (choice == 6) {
@@ -580,7 +584,6 @@ public class FutureBuilder {
     }
 
     private static void companyMode(InstitutePlacementCell placeCom) {
-        Scanner input = new Scanner(System.in);
         System.out.println("Welcome to the Company Mode!");
 
         while (true) {
@@ -592,6 +595,7 @@ public class FutureBuilder {
             int choice = inputChoice(4);
 
             if (choice == 1) {
+                input.nextLine();
                 System.out.println("Enter the Company's Name, Role, CTC, and CGPA Requirement (in order):");
                 String name = input.nextLine();
                 String role = input.nextLine();
@@ -629,7 +633,6 @@ public class FutureBuilder {
     }
 
     private static void companyLogin(InstitutePlacementCell placeCom, Company company) {
-        Scanner input = new Scanner(System.in);
         System.out.println("Welcome " + company.getName() + "!");
 
         while (true) {
@@ -642,19 +645,20 @@ public class FutureBuilder {
             int choice = inputChoice(5);
 
             if (choice == 1) {
-                System.out.printf("Enter the date and time of registration (dd-mm-yyyy hh:mm aa): ");
-                placeCom.registerCompany(company, LocalDateTime.parse(input.nextLine(), format));
+                System.out.print("Enter the date and time of registration (" + format + "): ");
+                placeCom.registerCompany(company, LocalDateTime.parse(input.next(), formatter));
             }
             else if (choice == 2) {
-                System.out.printf("Enter new offered Role: ");
+                input.nextLine();
+                System.out.print("Enter new offered Role: ");
                 company.updateRole(input.nextLine());
             }
             else if (choice == 3) {
-                System.out.printf("Enter new offered Package (in LPA): ");
+                System.out.print("Enter new offered Package (in LPA): ");
                 company.updateCTC(input.nextFloat());
             }
             else if (choice == 4) {
-                System.out.printf("Enter new CGPA Criteria: ");
+                System.out.print("Enter new CGPA Criteria: ");
                 company.updateCGPACriteria(input.nextFloat());
             }
             else {
@@ -665,7 +669,6 @@ public class FutureBuilder {
     }
 
     private static void placementCellMode(InstitutePlacementCell placeCom) {
-        Scanner input = new Scanner(System.in);
         System.out.println("Welcome to " + placeCom.getName() + " Placement-Cell!");
 
         while (true) {
@@ -698,24 +701,25 @@ public class FutureBuilder {
                 placeCom.getCategoryWiseStudents();
             }
             else if (choice == 6) {
-                System.out.println("Enter the Name of student: ");
+                input.nextLine();
+                System.out.print("Enter the Name of student: ");
                 String name = input.nextLine();
-                System.out.println("Enter the Roll Number of student: ");
+                System.out.print("Enter the Roll Number of student: ");
                 long roll = input.nextLong();
                 placeCom.getStudentDetails(name, roll);
             }
             else if (choice == 7) {
-                System.out.println("Enter the Name of company: ");
-                String name = input.nextLine();
-                placeCom.getCompanyDetails(name);
+                input.nextLine();
+                System.out.print("Enter the Name of company: ");
+                placeCom.getCompanyDetails(input.nextLine());
             }
             else if (choice == 8) {
                 placeCom.getAveragePackage();
             }
             else if (choice == 9) {
-                System.out.println("Enter the Name of company: ");
-                String name = input.nextLine();
-                placeCom.getCompanyProcessResults(name);
+                input.nextLine();
+                System.out.print("Enter the Name of company: ");
+                placeCom.getCompanyProcessResults(input.nextLine());
             }
             else {
                 System.out.println("Thanks for using the Placement-Cell Mode!");
@@ -725,12 +729,10 @@ public class FutureBuilder {
     }
 
     public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a");
-
-        InstitutePlacementCell placementCell = new InstitutePlacementCell("IIIT-Delhi");
-
+        System.out.print("Enter the name of your University: ");
+        InstitutePlacementCell placementCell = new InstitutePlacementCell(input.next());
         System.out.println("Welcome to Future-Builder! Together, we build the world!");
+
         while (true) {
             System.out.println("1. Enter the Application");
             System.out.println("2. Exit the Application");
