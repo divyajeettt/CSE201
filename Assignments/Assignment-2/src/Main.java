@@ -66,7 +66,6 @@ public class Main {
             if (choice == 1) {
                 input.nextLine();
                 System.out.println("Dear customer, Enter the following details:");
-
                 System.out.print("Name: ");
                 String name = input.nextLine();
                 System.out.print("Password: ");
@@ -77,10 +76,68 @@ public class Main {
                 String phoneNumber = input.nextLine();
                 System.out.print("Age: ");
                 int age = input.nextInt();
-
-            } else if (choice == 2) {
-            } else {
+                flipzon.addCustomer(new Normal(name, password, email, phoneNumber, age));
+                System.out.println("Customer Signed-Up successfully!");
+            }
+            else if (choice == 2) {
+                System.out.println("Dear customer, Enter the following details:");
+                System.out.print("Name: ");
+                String name = input.nextLine();
+                System.out.print("E-Mail ID: ");
+                String email = input.nextLine();
+                System.out.print("Password: ");
+                String password = input.nextLine();
+                if (flipzon.hasCustomer(name, email, password))
+                    customerMode(flipzon.getCustomer(name, email, password));
+                else
+                    System.out.println("Invalid Credentials! Cannot Log-In as " + name + "!");
+            }
+            else {
                 System.out.println("Thanks for using Customer Mode!");
+                break;
+            }
+        }
+    }
+
+    private static void customerMode(Customer customer) {
+        System.out.println("Welcome to " + flipzon.getName() + ", " + customer.getName() + "!");
+
+        while (true) {
+            System.out.println("Please select an action:");
+            System.out.println("1. Browse available Products");
+            System.out.println("2. Browse available Deals");
+            System.out.println("3. Add a Product to Cart");
+            System.out.println("4. Add a Deal to Cart");
+            System.out.println("5. View available Coupons");
+            System.out.println("6. Check Account Balance");
+            System.out.println("7. View Cart");
+            System.out.println("8. Empty Cart");
+            System.out.println("9. Checkout Cart");
+            System.out.println("10. Upgrade Customer Status");
+            System.out.println("11. Add an amount to your Wallet");
+            System.out.println("12. Back");
+            int choice = inputChoice(12);
+
+            if (choice == 1) {}
+            else if (choice == 2) {}
+            else if (choice == 3) {}
+            else if (choice == 4) {}
+            else if (choice == 5) {}
+            else if (choice == 6) {
+                System.out.println("Your current Account Balance is: Rs. " + customer.getBalance());
+            }
+            else if (choice == 7) {}
+            else if (choice == 8) {}
+            else if (choice == 9) {}
+            else if (choice == 10) {}
+            else if (choice == 11) {
+                System.out.print("Please enter the amount to add in your wallet: ");
+                float amount = input.nextFloat();
+                customer.addBalance(amount);
+                System.out.println("Amount added to wallet successfully!");
+            }
+            else {
+                System.out.println("Logging Out, " + customer.getName() + "!");
                 break;
             }
         }
