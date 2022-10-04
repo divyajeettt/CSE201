@@ -1,7 +1,7 @@
 public class Product {
-    private final String id;
-    private final String name;
-    private final String details;
+    private String id;
+    private String name;
+    private String details;
     private final float price;
     private int quantity;
     private float[] discounts;        // discounts in Order: {Elite, Prime, Normal}
@@ -15,6 +15,15 @@ public class Product {
         this.discounts = new float[] {0.0f, 0.0f, 0.0f};
     }
 
+    public String toString() {
+        return (
+            this.id + ": " + this.name
+            + "\n" + "Price: " + this.price
+            + "\n" + "Quantity: " + this.quantity
+            + "\n" + "Other details: " + this.details
+        );
+    }
+
     public String getId() {
         return this.id;
     }
@@ -23,16 +32,16 @@ public class Product {
         return this.name;
     }
 
-    public String getDetails() {
-        return this.details;
-    }
-
     public float getPrice() {
         return this.price;
     }
 
     public int getQuantity() {
-        return this.getQuantity();
+        return this.quantity;
+    }
+
+    public void incQuantity(int quantity) {
+        this.quantity += quantity;
     }
 
     public void setDiscounts(float[] discounts) {

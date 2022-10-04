@@ -34,6 +34,13 @@ public class Flipzon {
         return this.categories.get(cId).getProducts();
     }
 
+    public Category getCategory(String cId) {
+        return this.categories.get(cId);
+    }
+
+    public Product getProduct(String pId, String cId) {
+        return getCategory(cId).getProduct(pId);
+    }
 
     public boolean hasCategory(String cId) {
         return this.categories.containsKey(cId);
@@ -51,8 +58,8 @@ public class Flipzon {
         return this.categories.get(cId).hasProduct(pId);
     }
 
-    public void addProduct(Product product, String cName) {
-        this.categories.get(cName).addProduct(product);
+    public void addProduct(Product product, String cId) {
+        this.categories.get(cId).addProduct(product);
     }
 
     public void deleteProduct(String pId, String cId) {
@@ -81,5 +88,36 @@ public class Flipzon {
                 return customer;
         }
         return null;
+    }
+
+    public void incQuantity(String pId, String cId, int quantity) {
+        this.categories.get(cId).getProduct(pId).incQuantity(quantity);
+    }
+
+    public void decQuantity(String pId, String cId, int quantity) {
+        this.categories.get(cId).getProduct(pId).incQuantity(-1 * quantity);
+    }
+
+    public void exploreCatalogue() {
+        System.out.println("The following Products are available in " + this.name + ":");
+        int i = 1;
+        for (Category category: this.categories.values()) {
+            if (category.getId().equals("Dx0"))
+                continue;
+            System.out.println("Category " + i + ": " + category.getName());
+            int j = 1;
+            for (Product product: category.getProductList()) {
+                System.out.println("Product " + j + ":");
+                System.out.println(product);
+                j++;
+            }
+            i++;
+        }
+    }
+    public void exploreDeals() {
+        System.out.println("The following Deals are available in " + this.name + ":");
+        for (Product product: this.categories.get("Dx0").getProductList()) {
+
+        }
     }
 }

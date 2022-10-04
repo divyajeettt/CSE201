@@ -24,12 +24,12 @@ public class Category {
         return this.products;
     }
 
-    public boolean equals(Category category) {
-        return this.equals(category.getId(), category.getName());
+    public Collection<Product> getProductList() {
+        return this.products.values();
     }
 
-    public boolean equals(String id, String name) {
-        return (this.id.equals(id) && this.name.equals(name));
+    public Product getProduct(String pId) {
+        return this.products.get(pId);
     }
 
     public boolean hasProduct(String pId) {

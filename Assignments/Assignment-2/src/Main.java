@@ -16,6 +16,23 @@ public class Main {
         return choice;
     }
 
+    public static boolean handleEmptyCategory(String cId, String cName) {
+        System.out.println("A category cannot remain empty!");
+
+        System.out.println("Please select an action:");
+        System.out.println("1. Delete the Category " + cName);
+        System.out.println("2. Add a Product to the Category " + cName);
+        int choice = inputChoice(2);
+
+        if (choice == 1)
+            return true;
+        else {
+            // Take inputs to add a product
+            // Admin.addProduct(flipzon, cId, cName, pId, pName, details, price, quantity);
+            return false;
+        }
+    }
+
     private static boolean adminLogIn() {
         System.out.println("Dear Admin, please enter your credentials!");
         System.out.print("Username: ");
@@ -162,12 +179,14 @@ public class Main {
                     adminMode();
                 } else
                     System.out.println("Incorrect Credentials! Cannot Log-In as Admin!");
+            } else if (choice == 2) {
+                flipzon.exploreCatalogue();
+            } else if (choice == 3) {
+                flipzon.exploreDeals();
             }
-            else if (choice == 2) {}
-            else if (choice == 3) {}
-            else if (choice == 4)
+            else if (choice == 4) {
                 customerMenu();
-            else {
+            } else {
                 System.out.println("Thanks for using " + flipzon.getName() + "! We hope to see you again!");
                 break;
             }
@@ -176,3 +195,5 @@ public class Main {
         input.close();
     }
 }
+
+// HANDLE EDGE CASE: CANNOT PAY FOR EMPTY CART
