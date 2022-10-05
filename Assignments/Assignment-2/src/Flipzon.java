@@ -79,28 +79,20 @@ public class Flipzon {
         this.customers.add(customer);
     }
 
-    public boolean hasCustomer(String name, String email, String password) {
+    public boolean hasCustomer(String name, String password) {
         for (Customer customer: this.customers) {
-            if (customer.matchCredentials(name, email, password))
+            if (customer.matchCredentials(name, password))
                 return true;
         }
         return false;
     }
 
-    public Customer getCustomer(String name, String email, String password) {
+    public Customer getCustomer(String name, String password) {
         for (Customer customer: this.customers) {
-            if (customer.matchCredentials(name, email, password))
+            if (customer.matchCredentials(name, password))
                 return customer;
         }
         return null;
-    }
-
-    public void incQuantity(String pId, String cId, int quantity) {
-        this.categories.get(cId).getProduct(pId).incQuantity(quantity);
-    }
-
-    public void decQuantity(String pId, String cId, int quantity) {
-        this.categories.get(cId).getProduct(pId).incQuantity(-1 * quantity);
     }
 
     public void exploreCatalogue() {
@@ -123,6 +115,7 @@ public class Flipzon {
             i++;
         }
     }
+
     public void exploreDeals() {
         Collection<Product> deals = this.categories.get("Dx0").getProductList();
         if (deals.size() == 0) {
@@ -156,8 +149,9 @@ public class Flipzon {
         if (customer.affords(total)) {
             customer.deductBalance(total);
             System.out.println("Your order has been placed!");
+            System.out.println("An amount of Rs. " + total + "/- has been deducted from your Wallet!");
             System.out.println("Your order will be delivered in " + customer.getDeliveryTime() + " days!");
-            for (Product product: customer.getCart())
+            for (Product product: customer.getCart().values())
                 product.resetQuantity();
             customer.emptyCart();
             if (total > 5000)
@@ -167,6 +161,31 @@ public class Flipzon {
         else {
             System.out.println("You do not have enough balance in your Wallet!");
             System.out.println("Cannot place order! Your items will remain in your Cart!");
+        }
+    }
+
+    public Customer shiftStatus(Customer customer, String status, float price) {
+        if (customer.affords(price)) {
+            Customer shifted;
+            if (status.equals("Normal"))
+                shifted = new Normal(customer);
+            else if (status.equals("Prime"))
+                shifted = new Prime(customer);
+            else
+                shifted = new Elite(customer);
+            shifted.deductBalance(price);
+            this.customers.remove(customer);
+            this.addCustomer(shifted);
+            if (price != 0)
+                System.out.println("An amount of Rs. " + price + "/- has been deducted from your Wallet!");
+            System.out.println(
+                "Dear " + customer.getName() + ", your status has been successfully changed to " + status + "!"
+            );
+            return shifted;
+        }
+        else {
+            System.out.println("You don't have enough balance in your Wallet!");
+            return customer;
         }
     }
 }

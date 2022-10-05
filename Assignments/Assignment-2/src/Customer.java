@@ -1,33 +1,33 @@
+import javax.swing.text.html.CSS;
 import java.util.*;
 
 
 public abstract class Customer {
     private final String name;
     private final String password;
-    private final String email;
-    private final String phoneNumber;
-    private int age;
     protected float balance = 1000.0f;
     protected HashMap<String, Product> cart = new HashMap<>();
     protected ArrayList<Float> coupons = new ArrayList<>();
     protected float discount;
-    protected int deliveryTime;
     protected float extraDeliveryCharge;
 
     public abstract float getCartPrice();
     public abstract int getDeliveryTime();
     public abstract void addCoupons();
+    public abstract int getStatus();
+    public void getFreeProduct(Flipzon flipzon) {}
 
-    public Customer(String name, String password, String email, String phoneNumber, int age) {
+    public Customer(String name, String password) {
         this.name = name;
         this.password = password;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.age = age;
     }
 
     public String getName() {
         return this.name;
+    }
+
+    public String getPassword() {
+        return this.password;
     }
 
     public float getExtraDeliveryCharge() {
@@ -38,8 +38,8 @@ public abstract class Customer {
         return this.balance;
     }
 
-    public Collection<Product> getCart() {
-        return this.cart.values();
+    public HashMap<String, Product> getCart() {
+        return this.cart;
     }
 
     public boolean isEmptyCart() {
@@ -65,8 +65,8 @@ public abstract class Customer {
             return Collections.max(this.coupons);
     }
 
-    public boolean matchCredentials(String name, String email, String password) {
-        return (this.name.equals(name) && this.email.equals(email) && this.password.equals(password));
+    public boolean matchCredentials(String name, String password) {
+        return (this.name.equals(name) && this.password.equals(password));
     }
 
     public void addBalance(float amount) {
@@ -106,8 +106,7 @@ public abstract class Customer {
                     deals++;
                 else
                     products++;
-                int num = (product.getId().contains("D-") ? deals : products);
-                System.out.println(type + num + ": ");
+                System.out.println(type + (product.getId().contains("D-") ? deals : products) + ":");
                 System.out.println(product);
             }
         }
@@ -138,20 +137,33 @@ public abstract class Customer {
         System.out.println(
             "Delivery Charges: Rs. 100 + " + extraDeliveryCharge + "% of " + price + " = Rs. " + deliveryCharge + "/-"
         );
-        System.out.println("Discount: " + coupon + "% of " + price + " = Rs. " + discount + "/");
+        if (coupon != 0)
+            System.out.println("Discount: " + coupon + "% of " + price + " = Rs. " + discount + "/-");
         System.out.println("Final Amount: Rs. " + finalTotal);
         flipzon.placeOrder(this, finalTotal);
+        if (coupon != 0)
+            this.coupons.remove(coupon);
     }
-
-    public void getFreeProduct(Flipzon flipzon) {}
 }
 
 
 class Normal extends Customer {
-    public Normal(String name, String password, String email, String phoneNumber, int age) {
-        super(name, password, email, phoneNumber, age);
+    public Normal(String name, String password) {
+        super(name, password);
         this.discount = 0.0f;
         this.extraDeliveryCharge = 5.0f;
+    }
+
+    public Normal(Customer customer) {
+        super(customer.getName(), customer.getPassword());
+        this.balance = customer.balance;
+        this.cart = customer.cart;
+        this.coupons = customer.coupons;
+    }
+
+    @Override
+    public int getStatus() {
+        return 0;
     }
 
     @Override
@@ -174,10 +186,22 @@ class Normal extends Customer {
 
 
 class Prime extends Customer {
-    public Prime(String name, String password, String email, String phoneNumber, int age) {
-        super(name, password, email, phoneNumber, age);
+    public Prime(String name, String password) {
+        super(name, password);
         this.discount = 5.0f;
         this.extraDeliveryCharge = 2.0f;
+    }
+
+    public Prime(Customer customer) {
+        super(customer.getName(), customer.getPassword());
+        this.balance = customer.balance;
+        this.cart = customer.cart;
+        this.coupons = customer.coupons;
+    }
+
+    @Override
+    public int getStatus() {
+        return 1;
     }
 
     @Override
@@ -205,11 +229,24 @@ class Prime extends Customer {
     }
 }
 
+
 class Elite extends Customer {
-    public Elite(String name, String password, String email, String phoneNumber, int age) {
-        super(name, password, email, phoneNumber, age);
+    public Elite(String name, String password) {
+        super(name, password);
         this.discount = 10.0f;
         this.extraDeliveryCharge = 0.0f;
+    }
+
+    public Elite(Customer customer) {
+        super(customer.getName(), customer.getPassword());
+        this.balance = customer.balance;
+        this.cart = customer.cart;
+        this.coupons = customer.coupons;
+    }
+
+    @Override
+    public int getStatus() {
+        return 2;
     }
 
     @Override

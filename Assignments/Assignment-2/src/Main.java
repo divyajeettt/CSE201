@@ -94,25 +94,17 @@ public class Main {
                 String name = input.nextLine();
                 System.out.print("Password: ");
                 String password = input.nextLine();
-                System.out.print("E-Mail ID: ");
-                String email = input.nextLine();
-                System.out.print("Phone Number: ");
-                String phoneNumber = input.nextLine();
-                System.out.print("Age: ");
-                int age = input.nextInt();
-                flipzon.addCustomer(new Normal(name, password, email, phoneNumber, age));
+                flipzon.addCustomer(new Normal(name, password));
                 System.out.println("Customer Signed-Up successfully!");
             }
             else if (choice == 2) {
                 System.out.println("Dear customer, Enter the following details:");
                 System.out.print("Name: ");
                 String name = input.nextLine();
-                System.out.print("E-Mail ID: ");
-                String email = input.nextLine();
                 System.out.print("Password: ");
                 String password = input.nextLine();
-                if (flipzon.hasCustomer(name, email, password))
-                    customerMode(flipzon.getCustomer(name, email, password));
+                if (flipzon.hasCustomer(name, password))
+                    customerMode(flipzon.getCustomer(name, password));
                 else
                     System.out.println("Invalid Credentials! Cannot Log-In as " + name + "!");
             }
@@ -137,7 +129,7 @@ public class Main {
             System.out.println(" 7. View Cart");
             System.out.println(" 8. Empty Cart");
             System.out.println(" 9. Checkout Cart");
-            System.out.println("10. Upgrade Customer Status");
+            System.out.println("10. Upgrade/Downgrade Customer Status");
             System.out.println("11. Add an amount to your Wallet");
             System.out.println("12. Back");
             int choice = inputChoice(12);
@@ -203,7 +195,7 @@ public class Main {
                 }
             }
             else if (choice == 10) {
-                // Upgrade Customer Status
+                customer = shiftCustomer(customer);
             }
             else if (choice == 11) {
                 System.out.print("Please enter the amount to add in your wallet: ");
@@ -238,6 +230,39 @@ public class Main {
             }
             else
                 return true;
+        }
+    }
+
+    public static Customer shiftCustomer(Customer customer) {
+        if (customer.getStatus() == 0) {
+            System.out.println("Current Status: Normal");
+            System.out.println("Choose new Status (the cost of membership is mentioned alongside):");
+            System.out.println("1. Prime (Rs. 200/- per Month)");
+            System.out.println("2. Elite (Rs. 300/- per Month)");
+            if (inputChoice(2) == 1)
+                return flipzon.shiftStatus(customer, "Prime", 200.0f);
+            else
+                return flipzon.shiftStatus(customer, "Elite", 300.0f);
+        }
+        else if (customer.getStatus() == 1) {
+            System.out.println("Current Status: Prime");
+            System.out.println("Choose new Status (the cost of membership is mentioned alongside):");
+            System.out.println("1. Elite (Rs. 100/- per Month)");
+            System.out.println("2. Normal (Non-Refundable)");
+            if (inputChoice(2) == 1)
+                return flipzon.shiftStatus(customer, "Elite", 100.0f);
+            else
+                return flipzon.shiftStatus(customer, "Normal", 0.0f);
+        }
+        else {
+            System.out.println("Current Status: Elite");
+            System.out.println("Choose new Status (the cost of membership is mentioned alongside):");
+            System.out.println("1. Normal (Non-Refundable)");
+            System.out.println("2. Prime (Non-Refundable)");
+            if (inputChoice(2) == 1)
+                return flipzon.shiftStatus(customer, "Normal", 0.0f);
+            else
+                return flipzon.shiftStatus(customer, "Prime", 0.0f);
         }
     }
 
@@ -282,5 +307,4 @@ public class Main {
 }
 
 // MAKE A FUNCTION - INPUT PRODUCT DETAILS -> inputs all product-attributes
-// MAYBE - MAKE WALLET CLASS - this.balance as an attribute
 // HANDLE DISCOUNT SET BY ADMIN

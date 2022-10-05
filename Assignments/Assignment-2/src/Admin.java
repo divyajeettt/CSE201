@@ -45,13 +45,8 @@ class Admin {
             System.out.println("Category " + cName + " does not exist! Creating the category...");
             addCategory(flipzon, cId, cName, product, false);
         }
-        if (flipzon.hasProduct(pId, cId)) {
-            flipzon.incQuantity(pId, cId, quantity);
-            System.out.println(quantity + " more " + pName + "(s) added successfully!");
-        } else {
-            flipzon.addProduct(product, cId);
-            System.out.println("Product " + pName + " added successfully!");
-        }
+        flipzon.addProduct(product, cId);
+        System.out.println("Product " + pName + " added successfully!");
     }
 
     public static void deleteProduct(Flipzon flipzon, String cId, String cName, String pId, String pName) {
@@ -91,7 +86,7 @@ class Admin {
             flipzon.setCountDeals(flipzon.getCountDeals() + 1);
             int size = flipzon.getCountDeals();
             String details = "This deal is an offer on the Products: " + p1.getName() + " and " + p2.getName();
-            flipzon.addProduct(new Product("D-"+size, "Deal-"+size, details, price, 1, p1, p2), "Dx0");
+            flipzon.addProduct(new Product("D-"+size, "Deal-"+size, details, price, 1), "Dx0");
             System.out.println("Deal added successfully!");
         }
     }
