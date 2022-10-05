@@ -29,20 +29,12 @@ public class Flipzon {
         this.countDeals = count;
     }
 
-    public ArrayList<Customer> getCustomers() {
-        return this.customers;
-    }
-
     public HashMap<String, Category> getCategories() {
         return this.categories;
     }
 
     public HashMap<String, Product> getProducts(String cId) {
         return this.categories.get(cId).getProducts();
-    }
-
-    public Category getCategory(String cId) {
-        return this.categories.get(cId);
     }
 
     public Product getProduct(String pId) {
@@ -112,6 +104,10 @@ public class Flipzon {
     }
 
     public void exploreCatalogue() {
+        if (this.categories.size() == 0) {
+            System.out.println("There are no Products available in " + this.name + " currently!");
+            return;
+        }
         System.out.println("The following Products are available in " + this.name + ":");
         int i = 1;
         for (Category category: this.categories.values()) {
@@ -128,6 +124,12 @@ public class Flipzon {
         }
     }
     public void exploreDeals() {
+        Collection<Product> deals = this.categories.get("Dx0").getProductList();
+        if (deals.size() == 0) {
+            System.out.println("There are no Deals available in " + this.name + " currently!");
+            System.out.println("Please keep checking for regular exciting Deals!");
+            return;
+        }
         System.out.println("The following Deals are available in " + this.name + ":");
         for (Product product: this.categories.get("Dx0").getProductList())
             System.out.println(product);

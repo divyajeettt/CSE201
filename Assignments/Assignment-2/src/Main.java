@@ -258,16 +258,20 @@ public class Main {
                 if (adminLogIn()) {
                     System.out.println("Logging-In as Admin!");
                     adminMode();
-                } else
+                }
+                else
                     System.out.println("Incorrect Credentials! Cannot Log-In as Admin!");
-            } else if (choice == 2) {
+            }
+            else if (choice == 2) {
                 flipzon.exploreCatalogue();
-            } else if (choice == 3) {
+            }
+            else if (choice == 3) {
                 flipzon.exploreDeals();
             }
             else if (choice == 4) {
                 customerMenu();
-            } else {
+            }
+            else {
                 System.out.println("Thanks for using " + flipzon.getName() + "! We hope to see you again!");
                 break;
             }
@@ -280,4 +284,3 @@ public class Main {
 // MAKE A FUNCTION - INPUT PRODUCT DETAILS -> inputs all product-attributes
 // MAYBE - MAKE WALLET CLASS - this.balance as an attribute
 // HANDLE DISCOUNT SET BY ADMIN
-// GET FREE PRoDUCT

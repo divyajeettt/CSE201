@@ -29,7 +29,7 @@ public class Product {
     public String toString() {
         return (
             this.id + ": " + this.name
-            + "\n" + "Price: " + this.price
+            + "\n" + "Price (for 1 piece): " + this.price
             + "\n" + "Quantity: " + this.quantity
             + "\n" + "Other details: " + this.details
         );
