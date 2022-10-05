@@ -5,6 +5,7 @@ import java.util.*;
 public abstract class Customer {
     private final String name;
     private final String password;
+
     protected float balance = 1000.0f;
     protected HashMap<String, Product> cart = new HashMap<>();
     protected ArrayList<Float> coupons = new ArrayList<>();

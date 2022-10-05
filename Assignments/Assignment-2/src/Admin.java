@@ -15,17 +15,11 @@ class Admin {
         return (this.username.equals(username) && this.password.equals(password));
     }
 
-    public static void addCategory(Flipzon flipzon, String cId, String cName, Product product, boolean addProduct) {
-        if (flipzon.hasCategory(cId))
-            System.out.println("Category " + cName + " already exists!");
-        else {
-            flipzon.addCategory(new Category(cId, cName));
-            System.out.println("Category " + cName + " added successfully!");
-            if (addProduct) {
-                flipzon.addProduct(product, cId);
-                System.out.println("Product " + product.getName() + " added to category " + cName + " successfully!");
-            }
-        }
+    public static void addCategory(Flipzon flipzon, String cId, String cName, Product product) {
+        flipzon.addCategory(new Category(cId, cName));
+        System.out.println("Category " + cName + " added successfully!");
+        flipzon.addProduct(product, cId);
+        System.out.println("Product " + product.getName() + " added to category " + cName + " successfully!");
     }
 
     public static void deleteCategory(Flipzon flipzon, String cId, String cName) {
@@ -38,15 +32,15 @@ class Admin {
     }
 
     public static void addProduct(
-        Flipzon flipzon, String cId, String cName, String pId, String pName, String details, float price, int quantity
+        Flipzon flipzon, String cId, String cName, String pId, String pName, float price, String details
     ) {
-        Product product = new Product(pId, pName, details, price, quantity);
         if (!flipzon.hasCategory(cId)) {
             System.out.println("Category " + cName + " does not exist! Creating the category...");
-            addCategory(flipzon, cId, cName, product, false);
+            addCategory(flipzon, cId, cName, new Product(pId, pName, price, details));
+        } else {
+            flipzon.addProduct(new Product(pId, pName, price, details), cId);
+            System.out.println("Product " + pName + " added to category " + cName + " successfully!");
         }
-        flipzon.addProduct(product, cId);
-        System.out.println("Product " + pName + " added successfully!");
     }
 
     public static void deleteProduct(Flipzon flipzon, String cId, String cName, String pId, String pName) {
@@ -86,7 +80,7 @@ class Admin {
             flipzon.setCountDeals(flipzon.getCountDeals() + 1);
             int size = flipzon.getCountDeals();
             String details = "This deal is an offer on the Products: " + p1.getName() + " and " + p2.getName();
-            flipzon.addProduct(new Product("D-"+size, "Deal-"+size, details, price, 1), "Dx0");
+            flipzon.addProduct(new Product("D-"+size, "Deal-"+size, price, details), "Dx0");
             System.out.println("Deal added successfully!");
         }
     }

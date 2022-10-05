@@ -16,6 +16,25 @@ public class Main {
         return choice;
     }
 
+    private static void inputProduct(String cId, String cName, boolean inputCategory) {
+        System.out.println("Enter the following details about the Product you want to add:");
+        if (inputCategory) {
+            System.out.print("Category ID: ");
+            cId = input.nextLine();
+            System.out.print("Category Name: ");
+            cName = input.nextLine();
+        }
+        System.out.print("Product ID: ");
+        String pId = input.nextLine();
+        System.out.print("Product Name: ");
+        String pName = input.nextLine();
+        System.out.print("Price: ");
+        float price = input.nextFloat();
+        System.out.print("Product-specific details: ");
+        String details = input.nextLine();
+        Admin.addProduct(flipzon, cId, cName, pId, pName, price, details);
+    }
+
     public static boolean handleEmptyCategory(String cId, String cName) {
         System.out.println("A category cannot remain empty!");
         System.out.println("Please select an action:");
@@ -25,17 +44,7 @@ public class Main {
         if (choice == 1)
             return true;
         else {
-            System.out.print("Enter Product ID: ");
-            String pId = input.nextLine();
-            System.out.print("Enter Product name: ");
-            String pName = input.nextLine();
-            System.out.print("Enter Price of Product: ");
-            float price = input.nextFloat();
-            System.out.print("Enter Quantity: ");
-            int quantity = input.nextInt();
-            System.out.print("Enter Product-specific detials: ");
-            String details = input.nextLine();
-            Admin.addProduct(flipzon, cId, cName, pId, pName, details, price, quantity);
+            inputProduct(cId, cName, false);
             return false;
         }
     }
@@ -64,10 +73,50 @@ public class Main {
             System.out.println("7. Back");
             int choice = inputChoice(7);
 
-            if (choice == 1) {}
-            else if (choice == 2) {}
-            else if (choice == 3) {}
-            else if (choice == 4) {}
+            if (choice == 1) {
+                System.out.println("Enter the following details about the Category you want to add:");
+                System.out.print("Category ID: ");
+                String cId = input.nextLine();
+                System.out.print("Category Name: ");
+                String cName = input.nextLine();
+                if (flipzon.hasCategory(cId))
+                    System.out.println("Category " + cName + " already exists!");
+                else {
+                    System.out.println("Since, a category cannot be empty, enter the details about a Product in this Category!");
+                    System.out.print("Product ID: ");
+                    String pId = input.nextLine();
+                    System.out.print("Product Name: ");
+                    String pName = input.nextLine();
+                    System.out.print("Price: ");
+                    float price = input.nextFloat();
+                    System.out.print("Product-specific Details: ");
+                    String details = input.nextLine();
+                    Admin.addCategory(flipzon, cId, cName, new Product(pId, pName, price, details));
+                }
+            }
+            else if (choice == 2) {
+                System.out.println("Enter the following details about the Category you want to delete:");
+                System.out.print("Category ID: ");
+                String cId = input.nextLine();
+                System.out.print("Category Name: ");
+                String cName = input.nextLine();
+                Admin.deleteCategory(flipzon, cId, cName);
+            }
+            else if (choice == 3) {
+                inputProduct("", "", true);
+            }
+            else if (choice == 4) {
+                System.out.println("Enter the following details about the Product you want to delete:");
+                System.out.print("Category ID: ");
+                String cId = input.nextLine();
+                System.out.print("Category Name: ");
+                String cName = input.nextLine();
+                System.out.print("Product ID: ");
+                String pId = input.nextLine();
+                System.out.print("Product Name: ");
+                String pName = input.nextLine();
+                Admin.deleteProduct(flipzon, cId, cName, pId, pName);
+            }
             else if (choice == 5) {}
             else if (choice == 6) {}
             else {
@@ -306,5 +355,5 @@ public class Main {
     }
 }
 
-// MAKE A FUNCTION - INPUT PRODUCT DETAILS -> inputs all product-attributes
+// Admin Mode - options 5, 6 left
 // HANDLE DISCOUNT SET BY ADMIN

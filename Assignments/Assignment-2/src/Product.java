@@ -1,17 +1,16 @@
 public class Product {
     private String id;
     private String name;
-    private String details;
     private final float price;
-    private int quantity;
+    private String details;
+    private int quantity = 0;
     private float[] discounts;        // discounts in Order: {Elite, Prime, Normal}
 
-    public Product(String id, String name, String details, float price, int quantity) {
+    public Product(String id, String name, float price, String details) {
         this.id = id;
         this.name = name;
         this.details = details;
         this.price = price;
-        this.quantity = quantity;
         this.discounts = new float[] {0.0f, 0.0f, 0.0f};
     }
 
