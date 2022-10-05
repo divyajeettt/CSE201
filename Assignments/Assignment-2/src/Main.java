@@ -167,15 +167,33 @@ public class Main {
                 flipzon.addToCart(customer, pId, pName, true);
             }
             else if (choice == 5) {
-                
+                customer.viewCoupons();
             }
             else if (choice == 6) {
                 System.out.println("Your current Account Balance is: Rs. " + customer.getBalance());
             }
-            else if (choice == 7) {}
-            else if (choice == 8) {}
-            else if (choice == 9) {}
-            else if (choice == 10) {}
+            else if (choice == 7) {
+                customer.viewCart();
+            }
+            else if (choice == 8) {
+                if (customer.getCartSize() == 0)
+                    System.out.println("Your Cart is already empty!");
+                else {
+                    System.out.println("Do you really want to empty your cart? This action is IRREVERSIBLE!");
+                    System.out.println("Please select an action:");
+                    System.out.println("1. Confirm empty cart");
+                    System.out.println("2. Back");
+                    int action = inputChoice(2);
+                    if (action == 1)
+                        customer.emptyCart();
+                }
+            }
+            else if (choice == 9) {
+                // Checkout cart
+            }
+            else if (choice == 10) {
+                // Upgrade Customer Status
+            }
             else if (choice == 11) {
                 System.out.print("Please enter the amount to add in your wallet: ");
                 float amount = input.nextFloat();
@@ -227,3 +245,4 @@ public class Main {
 
 // MAKE A FUNCTION - INPUT PRODUCT DETAILS -> inputs all product-attributes
 // HANDLE EDGE CASE: CANNOT PAY FOR EMPTY CART
+// MAYBE - MAKE WALLET CLASS - this.balance as an attribute
