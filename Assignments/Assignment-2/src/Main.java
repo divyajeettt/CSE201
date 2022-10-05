@@ -27,8 +27,17 @@ public class Main {
         if (choice == 1)
             return true;
         else {
-            // Take inputs to add a product
-            // Admin.addProduct(flipzon, cId, cName, pId, pName, details, price, quantity);
+            System.out.print("Enter Product ID: ");
+            String pId = input.nextLine();
+            System.out.print("Enter Product name: ");
+            String pName = input.nextLine();
+            System.out.print("Enter Price of Product: ");
+            float price = input.nextFloat();
+            System.out.print("Enter Quantity: ");
+            int quantity = input.nextInt();
+            System.out.print("Enter Product-specific detials: ");
+            String details = input.nextLine();
+            Admin.addProduct(flipzon, cId, cName, pId, pName, details, price, quantity);
             return false;
         }
     }
@@ -121,25 +130,45 @@ public class Main {
 
         while (true) {
             System.out.println("Please select an action:");
-            System.out.println("1. Browse available Products");
-            System.out.println("2. Browse available Deals");
-            System.out.println("3. Add a Product to Cart");
-            System.out.println("4. Add a Deal to Cart");
-            System.out.println("5. View available Coupons");
-            System.out.println("6. Check Account Balance");
-            System.out.println("7. View Cart");
-            System.out.println("8. Empty Cart");
-            System.out.println("9. Checkout Cart");
+            System.out.println(" 1. Browse available Products");
+            System.out.println(" 2. Browse available Deals");
+            System.out.println(" 3. Add a Product to Cart");
+            System.out.println(" 4. Add a Deal to Cart");
+            System.out.println(" 5. View available Coupons");
+            System.out.println(" 6. Check Account Balance");
+            System.out.println(" 7. View Cart");
+            System.out.println(" 8. Empty Cart");
+            System.out.println(" 9. Checkout Cart");
             System.out.println("10. Upgrade Customer Status");
             System.out.println("11. Add an amount to your Wallet");
             System.out.println("12. Back");
             int choice = inputChoice(12);
 
-            if (choice == 1) {}
-            else if (choice == 2) {}
-            else if (choice == 3) {}
-            else if (choice == 4) {}
-            else if (choice == 5) {}
+            if (choice == 1) {
+                flipzon.exploreCatalogue();
+            }
+            else if (choice == 2) {
+                flipzon.exploreDeals();
+            }
+            else if (choice == 3) {
+                System.out.println("Enter the following details about the Product you want to add to cart:");
+                System.out.print("Enter Product ID: ");
+                String pId = input.nextLine();
+                System.out.print("Enter Product name: ");
+                String pName = input.nextLine();
+                flipzon.addToCart(customer, pId, pName, false);
+            }
+            else if (choice == 4) {
+                System.out.println("Enter the following details about the Deal you want to add to cart:");
+                System.out.print("Enter Deal ID: ");
+                String pId = input.nextLine();
+                System.out.print("Enter Deal name: ");
+                String pName = input.nextLine();
+                flipzon.addToCart(customer, pId, pName, true);
+            }
+            else if (choice == 5) {
+                
+            }
             else if (choice == 6) {
                 System.out.println("Your current Account Balance is: Rs. " + customer.getBalance());
             }
@@ -196,4 +225,5 @@ public class Main {
     }
 }
 
+// MAKE A FUNCTION - INPUT PRODUCT DETAILS -> inputs all product-attributes
 // HANDLE EDGE CASE: CANNOT PAY FOR EMPTY CART

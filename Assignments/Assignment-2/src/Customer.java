@@ -7,8 +7,8 @@ public class Customer {
     private final String email;
     private final String phoneNumber;
     private int age;
-    protected float wallet;
-    protected HashMap<String, Product> cart;
+    protected float wallet = 1000.0f;
+    protected ArrayList<Product> cart = new ArrayList<>();
     protected float discount;
     protected int deliveryTime;
     protected float extraDeliveryCharge;
@@ -20,8 +20,6 @@ public class Customer {
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.age = age;
-        this.wallet = 1000.0f;
-        this.cart = new HashMap<>();
     }
 
     public String getName() {
@@ -46,6 +44,10 @@ public class Customer {
 
     public void addBalance(float amount) {
         this.wallet += amount;
+    }
+
+    public void addToCart(Product product) {
+        this.cart.add(product);
     }
 }
 

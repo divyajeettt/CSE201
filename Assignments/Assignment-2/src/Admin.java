@@ -88,10 +88,11 @@ class Admin {
         if (price > p1.getPrice() + p2.getPrice())
             System.out.println("To form a deal, the combined price must be lower than the sum of individual prices!");
         else {
-            int size = flipzon.getProducts("Dx0").size() + 1;
+            flipzon.setCountDeals(flipzon.getCountDeals() + 1);
+            int size = flipzon.getCountDeals();
             String name = p1.getName() + " and " + p2.getName();
             String details = "This deal is an offer on the Products: " + name;
-//            flipzon.addProduct(new Product(price, 1, p1, p2), "Dx0");
+            flipzon.addProduct(new Product("D-"+size, "Deal-"+size, details, price, 1, p1, p2), "Dx0");
             System.out.println("Deal added successfully!");
         }
     }

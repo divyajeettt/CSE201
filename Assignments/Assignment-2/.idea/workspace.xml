@@ -4,7 +4,6 @@
     <list default="true" id="0c11395f-c1d9-469b-9b74-ac1467c41eff" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Admin.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Admin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Category.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Category.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Customer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Customer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Flipzon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Flipzon.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
@@ -71,7 +70,7 @@
       <option name="presentableId" value="Default" />
       <updated>1664802300075</updated>
       <workItem from="1664802301220" duration="18513000" />
-      <workItem from="1664872525473" duration="12491000" />
+      <workItem from="1664872525473" duration="16060000" />
     </task>
     <servers />
   </component>

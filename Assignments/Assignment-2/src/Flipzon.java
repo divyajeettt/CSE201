@@ -4,14 +4,13 @@ import java.util.*;
 public class Flipzon {
     private String name;
     private Admin admin;
-    private HashMap<String, Category> categories;
-    private ArrayList<Customer> customers;
+    private HashMap<String, Category> categories = new HashMap<>();
+    private ArrayList<Customer> customers = new ArrayList<>();
+    private int countDeals = 0;
 
     public Flipzon(String name, Admin admin) {
         this.name = name;
         this.admin = admin;
-        this.categories = new HashMap<>();
-        this.customers = new ArrayList<>();
     }
 
     public String getName() {
@@ -20,6 +19,14 @@ public class Flipzon {
 
     public Admin getAdmin() {
         return this.admin;
+    }
+
+    public int getCountDeals() {
+        return this.countDeals;
+    }
+
+    public void setCountDeals(int count) {
+        this.countDeals = count;
     }
 
     public ArrayList<Customer> getCustomers() {
@@ -38,8 +45,14 @@ public class Flipzon {
         return this.categories.get(cId);
     }
 
-    public Product getProduct(String pId, String cId) {
-        return getCategory(cId).getProduct(pId);
+    public Product getProduct(String pId) {
+        for (Category category: this.getCategories().values()) {
+            for (Product product: category.getProductList()) {
+                if (product.getId().equals(pId))
+                    return product;
+            }
+        }
+        return null;
     }
 
     public boolean hasCategory(String cId) {
@@ -116,8 +129,18 @@ public class Flipzon {
     }
     public void exploreDeals() {
         System.out.println("The following Deals are available in " + this.name + ":");
-        for (Product product: this.categories.get("Dx0").getProductList()) {
+        for (Product product: this.categories.get("Dx0").getProductList())
+            System.out.println(product);
+    }
 
+    public void addToCart(Customer customer, String pId, String pName, boolean isDeal) {
+        String type = (isDeal ? "Deal " : "Product ");
+        Product product = this.getProduct(pId);
+        if (product == null)
+            System.out.println(type + pName + " does not exist!");
+        else {
+            customer.addToCart(product);
+            System.out.println(type + pName + " added to Cart!");
         }
     }
 }
