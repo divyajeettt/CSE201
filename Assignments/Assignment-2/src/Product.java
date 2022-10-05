@@ -51,6 +51,14 @@ public class Product {
         return this.quantity;
     }
 
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void resetQuantity() {
+        this.quantity = 0;
+    }
+
     public void incQuantity(int quantity) {
         this.quantity += quantity;
     }

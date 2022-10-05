@@ -18,12 +18,10 @@ public class Main {
 
     public static boolean handleEmptyCategory(String cId, String cName) {
         System.out.println("A category cannot remain empty!");
-
         System.out.println("Please select an action:");
         System.out.println("1. Delete the Category " + cName);
         System.out.println("2. Add a Product to the Category " + cName);
         int choice = inputChoice(2);
-
         if (choice == 1)
             return true;
         else {
@@ -156,7 +154,9 @@ public class Main {
                 String pId = input.nextLine();
                 System.out.print("Enter Product name: ");
                 String pName = input.nextLine();
-                flipzon.addToCart(customer, pId, pName, false);
+                System.out.print("Enter quantity: ");
+                int quantity = input.nextInt();
+                flipzon.addToCart(customer, pId, pName, quantity);
             }
             else if (choice == 4) {
                 System.out.println("Enter the following details about the Deal you want to add to cart:");
@@ -164,7 +164,7 @@ public class Main {
                 String pId = input.nextLine();
                 System.out.print("Enter Deal name: ");
                 String pName = input.nextLine();
-                flipzon.addToCart(customer, pId, pName, true);
+                flipzon.addToCart(customer, pId, pName, 1);
             }
             else if (choice == 5) {
                 customer.viewCoupons();
@@ -176,7 +176,7 @@ public class Main {
                 customer.viewCart();
             }
             else if (choice == 8) {
-                if (customer.getCartSize() == 0)
+                if (customer.isEmptyCart())
                     System.out.println("Your Cart is already empty!");
                 else {
                     System.out.println("Do you really want to empty your cart? This action is IRREVERSIBLE!");
@@ -189,7 +189,18 @@ public class Main {
                 }
             }
             else if (choice == 9) {
-                // Checkout cart
+                if (customer.isEmptyCart())
+                    System.out.println("Cannot checkout empty Cart!");
+                else {
+                    System.out.println("For confirmation, here is your Cart!");
+                    customer.viewCart();
+                    if (deleteItemMenu(customer)) {
+                        System.out.println("Here is your final Cart!");
+                        customer.viewCart();
+                        System.out.println("Proceeding to Checkout...");
+                        customer.checkOutCart(flipzon);
+                    }
+                }
             }
             else if (choice == 10) {
                 // Upgrade Customer Status
@@ -204,6 +215,29 @@ public class Main {
                 System.out.println("Logging Out, " + customer.getName() + "!");
                 break;
             }
+        }
+    }
+
+    private static boolean deleteItemMenu(Customer customer) {
+        while (true) {
+            System.out.println("Please select an action:");
+            System.out.println("1. Delete Items from your Cart");
+            System.out.println("2. Proceed to Checkout");
+            int choice = inputChoice(2);
+            if (choice == 1) {
+                System.out.println("Enter the details of the Product you wish to remove from your Cart!");
+                System.out.print("Product ID: ");
+                String pId = input.nextLine();
+                System.out.print("Product Name: ");
+                String pName = input.nextLine();
+                customer.removeFromCart(pId, pName);
+                if (customer.isEmptyCart()) {
+                    System.out.println("Your cart is now Empty!");
+                    return false;
+                }
+            }
+            else
+                return true;
         }
     }
 
@@ -244,5 +278,6 @@ public class Main {
 }
 
 // MAKE A FUNCTION - INPUT PRODUCT DETAILS -> inputs all product-attributes
-// HANDLE EDGE CASE: CANNOT PAY FOR EMPTY CART
 // MAYBE - MAKE WALLET CLASS - this.balance as an attribute
+// HANDLE DISCOUNT SET BY ADMIN
+// GET FREE PRoDUCT

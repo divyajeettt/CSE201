@@ -133,14 +133,38 @@ public class Flipzon {
             System.out.println(product);
     }
 
-    public void addToCart(Customer customer, String pId, String pName, boolean isDeal) {
-        String type = (isDeal ? "Deal " : "Product ");
+    public void addToCart(Customer customer, String pId, String pName, int quantity) {
         Product product = this.getProduct(pId);
         if (product == null)
-            System.out.println(type + pName + " does not exist!");
+            System.out.println("Item " + pName + " does not exist!");
         else {
-            customer.addToCart(product);
-            System.out.println(type + pName + " added to Cart!");
+            if (customer.hasInCart(product.getId())) {
+                customer.incQuantity(pId, quantity);
+                System.out.println(quantity + " more " + pName + "(s) added to Cart!");
+            }
+            else {
+                customer.setQuantity(pId, quantity);
+                customer.addToCart(product);
+                System.out.println(quantity + " " + pName + "(s) added to Cart!");
+            }
+        }
+    }
+
+    public void placeOrder(Customer customer, float total) {
+        if (customer.affords(total)) {
+            customer.deductBalance(total);
+            System.out.println("Your order has been placed!");
+            System.out.println("Your order will be delivered in " + customer.getDeliveryTime() + " days!");
+            for (Product product: customer.getCart())
+                product.resetQuantity();
+            customer.emptyCart();
+            if (total > 5000)
+                customer.addCoupons();
+            customer.getFreeProduct(this);
+        }
+        else {
+            System.out.println("You do not have enough balance in your Wallet!");
+            System.out.println("Cannot place order! Your items will remain in your Cart!");
         }
     }
 }
