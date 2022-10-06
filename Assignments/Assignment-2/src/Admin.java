@@ -58,7 +58,7 @@ class Admin {
         }
     }
 
-    public void setDiscount(Flipzon flipzon, String cId, String cName, String pId, String pName, float[] discounts) {
+    public static void setDiscounts(Flipzon flipzon, String cId, String cName, String pId, String pName, float[] discounts) {
         if (!flipzon.hasCategory(cId)) {
             System.out.println("Category " + cName + " does not exist!");
             return;
@@ -66,12 +66,12 @@ class Admin {
         if (!flipzon.hasProduct(pId, cId))
             System.out.println("Product " + pName + " does not exist!");
         else {
-            flipzon.setDiscount(pId, cId, discounts);
-            System.out.println("Se");
+            flipzon.setDiscounts(pId, cId, discounts);
+            System.out.println("The given discounts have been applied to " + pName + " successfully!");
         }
     }
 
-    public void addDeal(Flipzon flipzon, Product p1, Product p2, float price) {
+    public static void addDeal(Flipzon flipzon, Product p1, Product p2, float price) {
         if (!flipzon.hasCategory("Dx0"))
             flipzon.addCategory(new Category("Dx0", "Deals"));
         if (price > p1.getPrice() + p2.getPrice())

@@ -28,10 +28,6 @@ public class Category {
         return this.products.values();
     }
 
-    public Product getProduct(String pId) {
-        return this.products.get(pId);
-    }
-
     public boolean hasProduct(String pId) {
         return this.products.containsKey(pId);
     }

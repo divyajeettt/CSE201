@@ -35,6 +35,20 @@ public class Main {
         Admin.addProduct(flipzon, cId, cName, pId, pName, price, details);
     }
 
+    private static HashMap<String, String> selectProduct(String action) {
+        HashMap<String, String> details = new HashMap<>();
+        System.out.println("Enter the following details about the Product you want to " + action + ":");
+        System.out.print("Category ID: ");
+        details.put("cId", input.nextLine());
+        System.out.print("Category Name: ");
+        details.put("cName", input.nextLine());
+        System.out.print("Product ID: ");
+        details.put("pId", input.nextLine());
+        System.out.print("Product Name: ");
+        details.put("pName", input.nextLine());
+        return details;
+    }
+
     public static boolean handleEmptyCategory(String cId, String cName) {
         System.out.println("A category cannot remain empty!");
         System.out.println("Please select an action:");
@@ -47,6 +61,14 @@ public class Main {
             inputProduct(cId, cName, false);
             return false;
         }
+    }
+
+    private static boolean isNull(Product product, String pId) {
+        if (product == null) {
+            System.out.println("Product with ID " + pId + " does not exist! Cannot add Deal!");
+            return true;
+        }
+        return false;
     }
 
     private static boolean adminLogIn() {
@@ -106,19 +128,33 @@ public class Main {
                 inputProduct("", "", true);
             }
             else if (choice == 4) {
-                System.out.println("Enter the following details about the Product you want to delete:");
-                System.out.print("Category ID: ");
-                String cId = input.nextLine();
-                System.out.print("Category Name: ");
-                String cName = input.nextLine();
-                System.out.print("Product ID: ");
-                String pId = input.nextLine();
-                System.out.print("Product Name: ");
-                String pName = input.nextLine();
-                Admin.deleteProduct(flipzon, cId, cName, pId, pName);
+                HashMap<String, String> map = selectProduct("delete");
+                Admin.deleteProduct(flipzon, map.get("cId"), map.get("cName"), map.get("pId"), map.get("pName"));
             }
-            else if (choice == 5) {}
-            else if (choice == 6) {}
+            else if (choice == 5) {
+                HashMap<String, String> map = selectProduct("add discount to");
+                System.out.print("Enter discounts for Elite, Prime, and Normal respectively (in %): ");
+                float e = input.nextFloat();
+                float p = input.nextFloat();
+                float n = input.nextFloat();
+                Admin.setDiscounts(
+                    flipzon, map.get("cId"), map.get("cName"), map.get("pId"), map.get("pName"), new float[] {e, p, n}
+                );
+            }
+            else if (choice == 6) {
+                System.out.println("Enter the following details of the Giveaway Deal: ");
+                System.out.print("Product ID 1: ");
+                String pId1 = input.nextLine();
+                System.out.print("Product ID 2: ");
+                String pId2 = input.nextLine();
+                Product p1 = flipzon.getProduct(pId1);
+                Product p2 = flipzon.getProduct(pId2);
+                System.out.print("Combined Giveaway Price (in Rs.): ");
+                float price = input.nextFloat();
+                if (isNull(p1, pId1) || isNull(p2, pId2))
+                    continue;
+                Admin.addDeal(flipzon, p1, p2, price);
+            }
             else {
                 System.out.println("Thanks for using Admin Mode, " + flipzon.getAdmin().getUsername() + "!");
                 break;
@@ -190,7 +226,7 @@ public class Main {
                 flipzon.exploreDeals();
             }
             else if (choice == 3) {
-                System.out.println("Enter the following details about the Product you want to add to cart:");
+                System.out.println("Enter the following details about the Product you want to add to Cart:");
                 System.out.print("Enter Product ID: ");
                 String pId = input.nextLine();
                 System.out.print("Enter Product name: ");
@@ -355,5 +391,4 @@ public class Main {
     }
 }
 
-// Admin Mode - options 5, 6 left
 // HANDLE DISCOUNT SET BY ADMIN

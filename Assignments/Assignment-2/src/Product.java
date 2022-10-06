@@ -52,7 +52,6 @@ public class Product {
     }
 
     public void setDiscounts(float[] discounts) {
-        for (int i=0; i < 3; i++)
-            this.discounts[i] = discounts[i];
+        System.arraycopy(discounts, 0, this.discounts, 0, 3);
     }
 }

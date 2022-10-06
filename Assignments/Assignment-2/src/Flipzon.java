@@ -71,7 +71,7 @@ public class Flipzon {
         this.categories.get(cId).deleteProduct(pId);
     }
 
-    public void setDiscount(String pId, String cId, float[] discounts) {
+    public void setDiscounts(String pId, String cId, float[] discounts) {
         this.categories.get(cId).getProducts().get(pId).setDiscounts(discounts);
     }
 
