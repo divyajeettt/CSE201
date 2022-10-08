@@ -1,8 +1,8 @@
 public class Product {
-    private String id;
-    private String name;
+    private final String id;
+    private final String name;
     private final float price;
-    private String details;
+    private final String details;
     private int quantity;
     private Product[] dealProducts = new Product[] {null, null};
     private float[] dealPrices = new float[] {0.0f, 0.0f, 0.0f};
@@ -19,7 +19,7 @@ public class Product {
     public Product(int dealNum, Product p1, Product p2, float[] dealPrices) {
         this.id = "D-" + dealNum;
         this.name = "Deal-" + dealNum;
-        this.details = "This Deal is an offer on the Products: " + p1.name + " and " + p2.name;
+        this.details = "This Deal is an offer on the Products " + p1.name + " and " + p2.name;
         this.price = p1.price + p2.price;
         this.dealPrices = dealPrices;
         this.quantity = 1;
@@ -34,15 +34,35 @@ public class Product {
         this.quantity = newQuantity;
         this.discounts = product.discounts;
         this.dealProducts = product.dealProducts;
+        this.dealPrices = product.dealPrices;
     }
 
     public String toString() {
         return (
             this.id + ": " + this.name
-            + "\n" + "Price (for 1 piece): Rs. " + this.price + "/-"
-            + "\n" + "Quantity: " + this.quantity
-            + "\n" + "Other details: " + this.details
+            + "\n\t" + "Price (for 1 piece): Rs. " + this.price + "/-"
+            + "\n\t" + "Quantity: " + this.quantity
+            + "\n\t" + "Other details: " + this.details
         );
+    }
+
+    public String print(int status) {
+        if (status == 3) {
+            return (
+                this.id + ": " + this.name
+                + "\n" + "Giveaway Prices:"
+                + "\n\t Elite: Rs. " + this.dealPrices[0] + "/-"
+                + "\n\t Prime: Rs. " + this.dealPrices[1] + "/-"
+                + "\n\t Normal: Rs. " + this.dealPrices[2] + "/-"
+                + "\n" + "Details: " + this.details
+            );
+        }
+        else
+            return (
+                this.id + ": " + this.name
+                + "\n\t" + "Giveaway Price: Rs. " + this.dealPrices[status] + "/-"
+                + "\n\t" + "Details: " + this.details
+            );
     }
 
     public String getId() {
@@ -57,8 +77,12 @@ public class Product {
         return this.price;
     }
 
-    public float[] getDiscounts() {
-        return this.discounts;
+    public float getPrice(int status) {
+        return this.dealPrices[status];
+    }
+
+    public float getDiscount(int status) {
+        return this.discounts[status];
     }
 
     public Product[] getDealProducts() {

@@ -117,7 +117,7 @@ public class Flipzon {
             System.out.println("Category " + i + ": " + category.getName());
             int j = 1;
             for (Product product: category.getProductList()) {
-                System.out.println("Product " + j + ":");
+                System.out.println("Product " + i + "." +  j + ":");
                 System.out.println(product);
                 j++;
             }
@@ -125,7 +125,7 @@ public class Flipzon {
         }
     }
 
-    public void exploreDeals() {
+    public void exploreDeals(int status) {
         if (this.categories.get("Dx0") == null) {
             System.out.println("There are no Deals available in " + this.name + " currently!");
             return;
@@ -138,7 +138,7 @@ public class Flipzon {
         }
         System.out.println("The following Deals are available in " + this.name + ":");
         for (Product product: this.categories.get("Dx0").getProductList())
-            System.out.println(product);
+            System.out.println(product.print(status) + "\n");
     }
 
     public void addToCart(Customer customer, String pId, String pName, int quantity) {
@@ -146,8 +146,17 @@ public class Flipzon {
         if (product == null)
             System.out.println("Item " + pName + " does not exist!");
         else if (customer.hasInCart(product.getId())) {
-            customer.incQuantity(pId, quantity);
-            System.out.println(quantity + " more " + pName + "(s) added to Cart!");
+            if (pId.contains("D-")) {
+                System.out.println("Deal already added to Cart!");
+                return;
+            }
+            int inCart = customer.getCart().get(pId).getQuantity();
+            if (inCart + quantity > product.getQuantity())
+                System.out.println("Only " + (product.getQuantity()-inCart) + " " + pName + "(s) left in stock!");
+            else {
+                customer.incQuantity(pId, quantity);
+                System.out.println(quantity + " more " + pName + "(s) added to Cart!");
+            }
         }
         else {
             if (quantity > product.getQuantity())
@@ -177,7 +186,7 @@ public class Flipzon {
                 else {
                     product.setQuantity(product.getQuantity() - customer.getCart().get(pId).getQuantity());
                     if (product.getQuantity() <= 0) {
-                        this.categories.remove(pId);
+                        this.deleteProduct(pId);
                         System.out.println("Product " + product.getName() + " is no longer available! All Sold Out!");
                     }
                 }
@@ -205,14 +214,14 @@ public class Flipzon {
             shifted.deductBalance(price);
             this.customers.remove(customer);
             this.addCustomer(shifted);
+            System.out.println(
+                "Dear " + customer.getName() + ", your status has been successfully changed to " + status + "!"
+            );
             if (price != 0)
                 System.out.println(
                     "An amount of Rs. " + price + "/- has been deducted from your Wallet! "
                     + "Current Balance: Rs. " + shifted.getBalance() + "/-"
                 );
-            System.out.println(
-                "Dear " + customer.getName() + ", your status has been successfully changed to " + status + "!"
-            );
             return shifted;
         }
         else {

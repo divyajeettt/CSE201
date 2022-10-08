@@ -1,4 +1,4 @@
-class Admin {
+public class Admin {
     private final String username;
     private final String password;
 
@@ -16,13 +16,11 @@ class Admin {
     }
 
     public static boolean checkDealPrices(Product p1, Product p2, float[] dealPrices) {
-        float[] discountsP1 = p1.getDiscounts();
-        float[] discountsP2 = p2.getDiscounts();
         float priceP1 = p1.getPrice();
         float priceP2 = p2.getPrice();
-        boolean cond0 = dealPrices[0] > (priceP1 - discountsP1[0]/100.0f * priceP1) + (priceP2 - discountsP2[0]/100.0f * priceP2);
-        boolean cond1 = dealPrices[1] > (priceP1 - discountsP1[1]/100.0f * priceP1) + (priceP2 - discountsP2[1]/100.0f * priceP2);
-        boolean cond2 = dealPrices[2] > (priceP1 - discountsP1[2]/100.0f * priceP1) + (priceP2 - discountsP2[2]/100.0f * priceP2);
+        boolean cond0 = dealPrices[0] > (priceP1 - p1.getDiscount(0)/100.0f * priceP1) + (priceP2 - p2.getDiscount(0)/100.0f * priceP2);
+        boolean cond1 = dealPrices[1] > (priceP1 - p1.getDiscount(1)/100.0f * priceP1) + (priceP2 - p2.getDiscount(1)/100.0f * priceP2);
+        boolean cond2 = dealPrices[2] > (priceP1 - p1.getDiscount(2)/100.0f * priceP1) + (priceP2 - p2.getDiscount(2)/100.0f * priceP2);
         return (cond0 || cond1 || cond2);
     }
 

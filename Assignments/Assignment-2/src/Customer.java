@@ -86,7 +86,7 @@ public abstract class Customer {
             System.out.println("You do not have any Coupons!");
         else {
             for (int i=0; i < this.coupons.size(); i++)
-                System.out.println("Coupon-" + (i+1) + ": " + this.coupons.get(i));
+                System.out.println("Coupon-" + (i+1) + ": " + this.coupons.get(i) + "%");
         }
     }
 
@@ -116,12 +116,16 @@ public abstract class Customer {
             int deals = 0;
             for (Product product: this.cart.values()) {
                 String type = (product.getId().contains("D-") ? "Deal" : "Product");
-                if (type.equals("Deal"))
+                if (type.equals("Deal")) {
                     deals++;
-                else
+                    System.out.println("Deal " + deals + ":");
+                    System.out.println(product.print(this.getStatus()));
+                }
+                else {
                     products++;
-                System.out.println(type + " " + (product.getId().contains("D-") ? deals : products) + ":");
-                System.out.println(product);
+                    System.out.println("Product " + products + ":");
+                    System.out.println(product);
+                }
             }
         }
     }
@@ -160,12 +164,13 @@ public abstract class Customer {
         float total = 0.0f;
         boolean usedCoupon = false;
         for (Product product: this.cart.values()) {
+            if (product.getId().contains("D-")) {
+                total += product.getPrice(this.getStatus());
+                continue;
+            }
             float price = product.getPrice() * product.getQuantity();
             float maxDiscount = Math.max(this.discount, Math.max(coupon, this.getDiscount(product)));
-            if (product.getId().contains("D-"))
-                total += price;
-            else
-                total += price - maxDiscount/100.0f * price;
+            total += price - maxDiscount / 100.0f * price;
             if (!usedCoupon && maxDiscount == coupon && !product.getId().contains("D-"))
                 usedCoupon = true;
         }
@@ -213,12 +218,12 @@ class Normal extends Customer {
 
     @Override
     public int getStatus() {
-        return 0;
+        return 2;
     }
 
     @Override
     public float getDiscount(Product product) {
-        return product.getDiscounts()[2];
+        return product.getDiscount(2);
     }
 
     @Override
@@ -250,7 +255,7 @@ class Prime extends Customer {
 
     @Override
     public float getDiscount(Product product) {
-        return product.getDiscounts()[1];
+        return product.getDiscount(1);
     }
 
     @Override
@@ -277,12 +282,12 @@ class Elite extends Customer {
 
     @Override
     public int getStatus() {
-        return 2;
+        return 0;
     }
 
     @Override
     public float getDiscount(Product product) {
-        return product.getDiscounts()[0];
+        return product.getDiscount(0);
     }
 
     @Override
@@ -301,6 +306,8 @@ class Elite extends Customer {
             List<Category> categoryList = new ArrayList<>(flipzon.getCategories().values());
             int luckyIndex = new Random().nextInt(categoryList.size());
             Category category = categoryList.get(luckyIndex);
+            if (category.getId().equals("Dx0"))
+                return;
 
             List<Product> productList = new ArrayList<>(category.getProductList());
             luckyIndex = new Random().nextInt(productList.size());
