@@ -117,6 +117,10 @@ public class Flipzon {
     }
 
     public void exploreDeals() {
+        if (this.categories.get("Dx0") == null) {
+            System.out.println("There are no Deals available in " + this.name + " currently!");
+            return;
+        }
         Collection<Product> deals = this.categories.get("Dx0").getProductList();
         if (deals.size() == 0) {
             System.out.println("There are no Deals available in " + this.name + " currently!");
