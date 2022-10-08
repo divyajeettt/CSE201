@@ -8,11 +8,12 @@ public abstract class Customer {
     protected float balance = 1000.0f;
     protected HashMap<String, Product> cart = new HashMap<>();
     protected ArrayList<Float> coupons = new ArrayList<>();
+    protected float discount;
     protected float extraDeliveryCharge;
 
-    public abstract float getCartPrice();
     public abstract int getDeliveryTime();
     public abstract int getStatus();
+    public abstract float getDiscount(Product product);
     public abstract int getNumCoupons();
     public void getFreeProduct(Flipzon flipzon) {}
 
@@ -138,26 +139,6 @@ public abstract class Customer {
         }
     }
 
-    public void checkOutCart(Flipzon flipzon) {
-        float extraDeliveryCharge = this.getExtraDeliveryCharge();
-        float coupon = this.getMaxCoupon();
-        float price = this.getCartPrice();
-        float deliveryCharge = 100 + (extraDeliveryCharge / 100 * price);
-        float discount = (coupon / 100 * price);
-        float finalTotal = price + deliveryCharge - discount;
-
-        System.out.println("Total Cost of Items: Rs. " + price + "/-");
-        System.out.println(
-            "Delivery Charges: Rs. 100 + " + extraDeliveryCharge + "% of " + price + " = Rs. " + deliveryCharge + "/-"
-        );
-        if (coupon != 0)
-            System.out.println("Discount: " + coupon + "% of " + price + " = Rs. " + discount + "/-");
-        System.out.println("Final Amount: Rs. " + finalTotal);
-        flipzon.placeOrder(this, finalTotal);
-        if (coupon != 0)
-            this.coupons.remove(coupon);
-    }
-
     public void addCoupons(int numCoupons) {
         int newCoupons = (int) (Math.random()*(5-3+1) + 3);
         for (int i=0; i < numCoupons; i++) {
@@ -166,17 +147,55 @@ public abstract class Customer {
             System.out.println("You have won a Coupon of " + newCoupon + "%!");
         }
     }
+
+    public float getCartPrice(float coupon) {
+        float total = 0.0f;
+        boolean usedCoupon = false;
+        for (Product product: this.cart.values()) {
+            float price = product.getPrice() * product.getQuantity();
+            float maxDiscount = Math.max(this.discount, Math.max(coupon, this.getDiscount(product)));
+            if (product.getId().contains("D-"))
+                total += price;
+            else
+                total += price - maxDiscount/100.0f * price;
+            if (!usedCoupon && maxDiscount == coupon && !product.getId().contains("D-"))
+                usedCoupon = true;
+        }
+        if (coupon != 0 && usedCoupon)
+            this.coupons.remove(coupon);
+        return total;
+    }
+
+    public void checkOutCart(Flipzon flipzon) {
+        float price = this.getCartPrice(this.getMaxCoupon());
+        float extraDeliveryCharge = this.getExtraDeliveryCharge();
+        float deliveryCharge = 100.0f + (extraDeliveryCharge/100.0f * price);
+        float finalTotal = price + deliveryCharge;
+
+        System.out.println("Total Cost of Items: Rs. " + price + "/-");
+        if (extraDeliveryCharge != 0)
+            System.out.println(
+                "Delivery Charges: Rs. 100 + " + extraDeliveryCharge + "% of " + price + " = Rs. " + deliveryCharge + "/-"
+            );
+        else
+            System.out.println("Delivery Charges: Rs. 100/-");
+        System.out.println("Final Amount: Rs. " + finalTotal);
+        flipzon.placeOrder(this, finalTotal);
+    }
 }
 
 
 class Normal extends Customer {
     public Normal(String name, String password) {
         super(name, password);
+        this.discount = 0.0f;
         this.extraDeliveryCharge = 5.0f;
     }
 
     public Normal(Customer customer) {
         super(customer.getName(), customer.getPassword());
+        this.discount = 0.0f;
+        this.extraDeliveryCharge = 5.0f;
         this.balance = customer.balance;
         this.cart = customer.cart;
         this.coupons = customer.coupons;
@@ -188,12 +207,8 @@ class Normal extends Customer {
     }
 
     @Override
-    public float getCartPrice() {
-        float total = 0.0f;
-        for (Product product: this.cart.values()) {
-            total += product.getPrice() * product.getQuantity();
-        }
-        return total;
+    public float getDiscount(Product product) {
+        return product.getDiscounts()[2];
     }
 
     @Override
@@ -211,6 +226,8 @@ class Normal extends Customer {
 class Prime extends Customer {
     public Prime(Customer customer) {
         super(customer.getName(), customer.getPassword());
+        this.discount = 5.0f;
+        this.extraDeliveryCharge = 2.0f;
         this.balance = customer.balance;
         this.cart = customer.cart;
         this.coupons = customer.coupons;
@@ -222,12 +239,8 @@ class Prime extends Customer {
     }
 
     @Override
-    public float getCartPrice() {
-        float total = 0.0f;
-        for (Product product: this.cart.values()) {
-            total += (product.getPrice() - (5.0f / 100.0f * product.getPrice())) * product.getQuantity();
-        }
-        return total;
+    public float getDiscount(Product product) {
+        return product.getDiscounts()[1];
     }
 
     @Override
@@ -245,6 +258,8 @@ class Prime extends Customer {
 class Elite extends Customer {
     public Elite(Customer customer) {
         super(customer.getName(), customer.getPassword());
+        this.discount = 10.0f;
+        this.extraDeliveryCharge = 0.0f;
         this.balance = customer.balance;
         this.cart = customer.cart;
         this.coupons = customer.coupons;
@@ -256,11 +271,8 @@ class Elite extends Customer {
     }
 
     @Override
-    public float getCartPrice() {
-        float total = 0.0f;
-        for (Product product: this.cart.values())
-            total += (product.getPrice() - (10.0f/100.0f * product.getPrice())) * product.getQuantity();
-        return total;
+    public float getDiscount(Product product) {
+        return product.getDiscounts()[0];
     }
 
     @Override

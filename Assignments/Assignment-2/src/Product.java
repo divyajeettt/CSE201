@@ -48,6 +48,10 @@ public class Product {
         return this.price;
     }
 
+    public float[] getDiscounts() {
+        return this.discounts;
+    }
+
     public int getQuantity() {
         return this.quantity;
     }

@@ -396,5 +396,3 @@ public class Main {
         input.close();
     }
 }
-
-// HANDLE DISCOUNT SET BY ADMIN - EDITS IN BILLING - LINE 142 - Customer.java
