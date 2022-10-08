@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 class Admin {
     private final String username;
     private final String password;
@@ -32,13 +34,14 @@ class Admin {
     }
 
     public static void addProduct(
-        Flipzon flipzon, String cId, String cName, String pId, String pName, float price, String details
+        Flipzon flipzon, String cId, String cName, String pId, String pName, float price, int quantity, String details
     ) {
         if (!flipzon.hasCategory(cId)) {
             System.out.println("Category " + cName + " does not exist! Creating the category...");
-            addCategory(flipzon, cId, cName, new Product(pId, pName, price, details));
-        } else {
-            flipzon.addProduct(new Product(pId, pName, price, details), cId);
+            addCategory(flipzon, cId, cName, new Product(pId, pName, price, quantity, details));
+        }
+        else {
+            flipzon.addProduct(new Product(pId, pName, price, quantity, details), cId);
             System.out.println("Product " + pName + " added to category " + cName + " successfully!");
         }
     }
@@ -80,7 +83,7 @@ class Admin {
             flipzon.setCountDeals(flipzon.getCountDeals() + 1);
             int size = flipzon.getCountDeals();
             String details = "This deal is an offer on the Products: " + p1.getName() + " and " + p2.getName();
-            flipzon.addProduct(new Product("D-"+size, "Deal-"+size, price, details), "Dx0");
+            flipzon.addProduct(new Product("D-"+size, "Deal-"+size, price, 1, details), "Dx0");
             System.out.println("Deal added successfully!");
         }
     }

@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.*;
 
 
@@ -16,6 +17,18 @@ public class Main {
         return choice;
     }
 
+    private static String inputDetails() {
+        System.out.print("Product-specific details: ");
+        StringBuilder details = new StringBuilder();
+        while (input.hasNextLine()) {
+            String read = input.nextLine();
+            if (read == null || read.isEmpty())
+                break;
+            details.append(read);
+        }
+        return details.toString();
+    }
+
     private static void inputProduct(String cId, String cName, boolean inputCategory) {
         System.out.println("Enter the following details about the Product you want to add:");
         if (inputCategory) {
@@ -30,9 +43,9 @@ public class Main {
         String pName = input.nextLine();
         System.out.print("Price: ");
         float price = input.nextFloat();
-        System.out.print("Product-specific details: ");
-        String details = input.nextLine();
-        Admin.addProduct(flipzon, cId, cName, pId, pName, price, details);
+        System.out.print("Quantity to add: ");
+        int quantity = input.nextInt();
+        Admin.addProduct(flipzon, cId, cName, pId, pName, price, quantity, inputDetails());
     }
 
     private static HashMap<String, String> selectProduct(String action) {
@@ -104,16 +117,8 @@ public class Main {
                 if (flipzon.hasCategory(cId))
                     System.out.println("Category " + cName + " already exists!");
                 else {
-                    System.out.println("Since, a category cannot be empty, enter the details about a Product in this Category!");
-                    System.out.print("Product ID: ");
-                    String pId = input.nextLine();
-                    System.out.print("Product Name: ");
-                    String pName = input.nextLine();
-                    System.out.print("Price: ");
-                    float price = input.nextFloat();
-                    System.out.print("Product-specific Details: ");
-                    String details = input.nextLine();
-                    Admin.addCategory(flipzon, cId, cName, new Product(pId, pName, price, details));
+                    System.out.println("A category cannot be empty!");
+                    inputProduct(cId, cName, false);
                 }
             }
             else if (choice == 2) {
@@ -202,6 +207,7 @@ public class Main {
 
     private static void customerMode(Customer customer) {
         System.out.println("Welcome to " + flipzon.getName() + ", " + customer.getName() + "!");
+        customer.manageCart(flipzon);
 
         while (true) {
             System.out.println("Please select an action:");
@@ -391,4 +397,4 @@ public class Main {
     }
 }
 
-// HANDLE DISCOUNT SET BY ADMIN
+// HANDLE DISCOUNT SET BY ADMIN - EDITS IN BILLING - LINE 142 - Customer.java

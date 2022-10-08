@@ -132,14 +132,15 @@ public class Flipzon {
         Product product = this.getProduct(pId);
         if (product == null)
             System.out.println("Item " + pName + " does not exist!");
+        else if (customer.hasInCart(product.getId())) {
+            customer.incQuantity(pId, quantity);
+            System.out.println(quantity + " more " + pName + "(s) added to Cart!");
+        }
         else {
-            if (customer.hasInCart(product.getId())) {
-                customer.incQuantity(pId, quantity);
-                System.out.println(quantity + " more " + pName + "(s) added to Cart!");
-            }
+            if (quantity > product.getQuantity())
+                System.out.println("Only " + product.getQuantity() + " " + pName + "(s) are available!");
             else {
-                customer.setQuantity(pId, quantity);
-                customer.addToCart(product);
+                customer.addToCart(new Product(product, quantity));
                 System.out.println(quantity + " " + pName + "(s) added to Cart!");
             }
         }
@@ -151,11 +152,13 @@ public class Flipzon {
             System.out.println("Your order has been placed!");
             System.out.println("An amount of Rs. " + total + "/- has been deducted from your Wallet!");
             System.out.println("Your order will be delivered in " + customer.getDeliveryTime() + " days!");
-            for (Product product: customer.getCart().values())
-                product.resetQuantity();
+            for (String pId: customer.getCart().keySet()) {
+                Product product = this.getProduct(pId);
+                product.setQuantity(product.getQuantity() - customer.getCart().get(pId).getQuantity());
+            }
             customer.emptyCart();
             if (total > 5000)
-                customer.addCoupons();
+                customer.addCoupons(customer.getNumCoupons());
             customer.getFreeProduct(this);
         }
         else {

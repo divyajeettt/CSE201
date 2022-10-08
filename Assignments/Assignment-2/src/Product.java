@@ -1,3 +1,6 @@
+import java.util.*;
+
+
 public class Product {
     private String id;
     private String name;
@@ -6,12 +9,22 @@ public class Product {
     private int quantity = 0;
     private float[] discounts;        // discounts in Order: {Elite, Prime, Normal}
 
-    public Product(String id, String name, float price, String details) {
+    public Product(String id, String name, float price, int quantity, String details) {
         this.id = id;
         this.name = name;
         this.details = details;
         this.price = price;
+        this.quantity = quantity;
         this.discounts = new float[] {0.0f, 0.0f, 0.0f};
+    }
+
+    public Product(Product product, int newQuantity) {
+        this.id = product.id;
+        this.name = product.name;
+        this.details = product.details;
+        this.price = product.price;
+        this.quantity = newQuantity;
+        this.discounts = product.discounts;
     }
 
     public String toString() {
@@ -41,10 +54,6 @@ public class Product {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
-    }
-
-    public void resetQuantity() {
-        this.quantity = 0;
     }
 
     public void incQuantity(int quantity) {

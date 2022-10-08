@@ -8,13 +8,12 @@ public abstract class Customer {
     protected float balance = 1000.0f;
     protected HashMap<String, Product> cart = new HashMap<>();
     protected ArrayList<Float> coupons = new ArrayList<>();
-    protected float discount;
     protected float extraDeliveryCharge;
 
     public abstract float getCartPrice();
     public abstract int getDeliveryTime();
-    public abstract void addCoupons();
     public abstract int getStatus();
+    public abstract int getNumCoupons();
     public void getFreeProduct(Flipzon flipzon) {}
 
     public Customer(String name, String password) {
@@ -48,10 +47,6 @@ public abstract class Customer {
 
     public boolean hasInCart(String pId) {
         return this.cart.containsKey(pId);
-    }
-
-    public void setQuantity(String pId, int quantity) {
-        this.cart.get(pId).setQuantity(quantity);
     }
 
     public void incQuantity(String pId, int quantity) {
@@ -91,6 +86,24 @@ public abstract class Customer {
         else {
             for (int i=0; i < this.coupons.size(); i++)
                 System.out.println("Coupon-" + (i+1) + ": " + this.coupons.get(i));
+        }
+    }
+
+    public void manageCart(Flipzon flipzon) {
+        boolean isUpdated = false;
+        for (String pId: this.cart.keySet()) {
+            Product product = this.cart.get(pId);
+            int available = flipzon.getProduct(product.getId()).getQuantity();
+            int inCart = product.getQuantity();
+            if (available < inCart) {
+                System.out.println("Sorry, we are currently short on Stock of " + product.getName() + "(s)!");
+                this.cart.get(pId).setQuantity(inCart - available);
+                isUpdated = true;
+            }
+        }
+        if (isUpdated) {
+            System.out.println("Your Cart is been modified! Here is your updated Cart!");
+            this.viewCart();
         }
     }
 
@@ -144,13 +157,21 @@ public abstract class Customer {
         if (coupon != 0)
             this.coupons.remove(coupon);
     }
+
+    public void addCoupons(int numCoupons) {
+        int newCoupons = (int) (Math.random()*(5-3+1) + 3);
+        for (int i=0; i < numCoupons; i++) {
+            float newCoupon = Math.round(2 * (Math.random()*(16-5+1) + 5)) / 2.0f;
+            this.coupons.add(newCoupon);
+            System.out.println("You have won a Coupon of " + newCoupon + "%!");
+        }
+    }
 }
 
 
 class Normal extends Customer {
     public Normal(String name, String password) {
         super(name, password);
-        this.discount = 0.0f;
         this.extraDeliveryCharge = 5.0f;
     }
 
@@ -181,17 +202,13 @@ class Normal extends Customer {
     }
 
     @Override
-    public void addCoupons() {}
+    public int getNumCoupons() {
+        return 0;
+    }
 }
 
 
 class Prime extends Customer {
-    public Prime(String name, String password) {
-        super(name, password);
-        this.discount = 5.0f;
-        this.extraDeliveryCharge = 2.0f;
-    }
-
     public Prime(Customer customer) {
         super(customer.getName(), customer.getPassword());
         this.balance = customer.balance;
@@ -219,24 +236,13 @@ class Prime extends Customer {
     }
 
     @Override
-    public void addCoupons() {
-        int newCoupons = (int) (Math.random()*(3-1+1) + 1);
-        for (int i=0; i < newCoupons; i++) {
-            float newCoupon = Math.round(2 * (Math.random()*(11-5+1) + 5)) / 2.0f;
-            this.coupons.add(newCoupon);
-            System.out.println("You have won a Coupon of " + newCoupon + "%!");
-        }
+    public int getNumCoupons() {
+        return ((int) (Math.random()*(3-1+1) + 1));
     }
 }
 
 
 class Elite extends Customer {
-    public Elite(String name, String password) {
-        super(name, password);
-        this.discount = 10.0f;
-        this.extraDeliveryCharge = 0.0f;
-    }
-
     public Elite(Customer customer) {
         super(customer.getName(), customer.getPassword());
         this.balance = customer.balance;
@@ -263,13 +269,8 @@ class Elite extends Customer {
     }
 
     @Override
-    public void addCoupons() {
-        int newCoupons = (int) (Math.random()*(5-3+1) + 3);
-        for (int i=0; i < newCoupons; i++) {
-            float newCoupon = Math.round(2 * (Math.random()*(11-5+1) + 5)) / 2.0f;
-            this.coupons.add(newCoupon);
-            System.out.println("You have won a Coupon of " + newCoupon + "%!");
-        }
+    public int getNumCoupons() {
+        return ((int) (Math.random()*(5-3+1) + 1));
     }
 
     @Override
