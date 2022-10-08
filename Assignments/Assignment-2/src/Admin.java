@@ -15,6 +15,17 @@ class Admin {
         return (this.username.equals(username) && this.password.equals(password));
     }
 
+    public static boolean checkDealPrices(Product p1, Product p2, float[] dealPrices) {
+        float[] discountsP1 = p1.getDiscounts();
+        float[] discountsP2 = p2.getDiscounts();
+        float priceP1 = p1.getPrice();
+        float priceP2 = p2.getPrice();
+        boolean cond0 = dealPrices[0] > (priceP1 - discountsP1[0]/100.0f * priceP1) + (priceP2 - discountsP2[0]/100.0f * priceP2);
+        boolean cond1 = dealPrices[1] > (priceP1 - discountsP1[1]/100.0f * priceP1) + (priceP2 - discountsP2[1]/100.0f * priceP2);
+        boolean cond2 = dealPrices[2] > (priceP1 - discountsP1[2]/100.0f * priceP1) + (priceP2 - discountsP2[2]/100.0f * priceP2);
+        return (cond0 || cond1 || cond2);
+    }
+
     public static void addCategory(Flipzon flipzon, String cId, String cName, Product product) {
         flipzon.addCategory(new Category(cId, cName));
         System.out.println("Category " + cName + " added successfully!");
@@ -37,6 +48,11 @@ class Admin {
         if (!flipzon.hasCategory(cId)) {
             System.out.println("Category " + cName + " does not exist! Creating the category...");
             addCategory(flipzon, cId, cName, new Product(pId, pName, price, quantity, details));
+        }
+        else if (flipzon.hasProduct(pId, cId)) {
+            Product product = flipzon.getProduct(pId);
+            flipzon.getProduct(pId).setQuantity(product.getQuantity() + quantity);
+            System.out.println(quantity + " more " + pName + "(s) added successfully!");
         }
         else {
             flipzon.addProduct(new Product(pId, pName, price, quantity, details), cId);
@@ -72,16 +88,15 @@ class Admin {
         }
     }
 
-    public static void addDeal(Flipzon flipzon, Product p1, Product p2, float price) {
+    public static void addDeal(Flipzon flipzon, Product p1, Product p2, float[] dealPrices) {
         if (!flipzon.hasCategory("Dx0"))
             flipzon.addCategory(new Category("Dx0", "Deals"));
-        if (price > p1.getPrice() + p2.getPrice())
-            System.out.println("To form a deal, the combined price must be lower than the sum of individual prices!");
+        if (checkDealPrices(p1, p2, dealPrices))
+            System.out.println("To form a Deal, the combined price must be lower than the sum of individual prices (after discount)");
         else {
             flipzon.setCountDeals(flipzon.getCountDeals() + 1);
             int size = flipzon.getCountDeals();
-            String details = "This deal is an offer on the Products: " + p1.getName() + " and " + p2.getName();
-            flipzon.addProduct(new Product("D-"+size, "Deal-"+size, price, 1, details), "Dx0");
+            flipzon.addProduct(new Product(size, p1, p2, dealPrices), "Dx0");
             System.out.println("Deal added successfully!");
         }
     }

@@ -17,18 +17,19 @@ public class Main {
     }
 
     private static String inputDetails() {
+        input.nextLine();
         System.out.print("Product-specific details: ");
         StringBuilder details = new StringBuilder();
-        while (input.hasNextLine()) {
+        while (true) {
             String read = input.nextLine();
             if (read == null || read.isEmpty())
                 break;
-            details.append(read);
+            details.append(read).append("\n");
         }
         return details.toString();
     }
 
-    private static void inputProduct(String cId, String cName, boolean inputCategory) {
+    private static void inputProduct(String cId, String cName, boolean inputCategory, boolean addCategory) {
         System.out.println("Enter the following details about the Product you want to add:");
         if (inputCategory) {
             System.out.print("Category ID: ");
@@ -40,11 +41,14 @@ public class Main {
         String pId = input.nextLine();
         System.out.print("Product Name: ");
         String pName = input.nextLine();
-        System.out.print("Price: ");
+        System.out.print("Price (in Rs.): ");
         float price = input.nextFloat();
         System.out.print("Quantity to add: ");
         int quantity = input.nextInt();
-        Admin.addProduct(flipzon, cId, cName, pId, pName, price, quantity, inputDetails());
+        if (addCategory)
+            Admin.addCategory(flipzon, cId, cName, new Product(pId, pName, price, quantity, inputDetails()));
+        else
+            Admin.addProduct(flipzon, cId, cName, pId, pName, price, quantity, inputDetails());
     }
 
     private static HashMap<String, String> selectProduct(String action) {
@@ -63,14 +67,14 @@ public class Main {
 
     public static boolean handleEmptyCategory(String cId, String cName) {
         System.out.println("A category cannot remain empty!");
-        System.out.println("Please select an action:");
+        System.out.println("\nPlease select an action:");
         System.out.println("1. Delete the Category " + cName);
         System.out.println("2. Add a Product to the Category " + cName);
         int choice = inputChoice(2);
         if (choice == 1)
             return true;
         else {
-            inputProduct(cId, cName, false);
+            inputProduct(cId, cName, false, false);
             return false;
         }
     }
@@ -97,7 +101,7 @@ public class Main {
         System.out.println("Welcome " + flipzon.getAdmin().getUsername() + "!");
 
         while (true) {
-            System.out.println("Please select an action:");
+            System.out.println("\nPlease select an action:");
             System.out.println("1. Add a Category");
             System.out.println("2. Delete a Category");
             System.out.println("3. Add a Product");
@@ -106,6 +110,7 @@ public class Main {
             System.out.println("6. Add a Giveaway Deal");
             System.out.println("7. Back");
             int choice = inputChoice(7);
+            input.nextLine();
 
             if (choice == 1) {
                 System.out.println("Enter the following details about the Category you want to add:");
@@ -117,7 +122,7 @@ public class Main {
                     System.out.println("Category " + cName + " already exists!");
                 else {
                     System.out.println("A category cannot be empty!");
-                    inputProduct(cId, cName, false);
+                    inputProduct(cId, cName, false, true);
                 }
             }
             else if (choice == 2) {
@@ -129,7 +134,7 @@ public class Main {
                 Admin.deleteCategory(flipzon, cId, cName);
             }
             else if (choice == 3) {
-                inputProduct("", "", true);
+                inputProduct("", "", true, false);
             }
             else if (choice == 4) {
                 HashMap<String, String> map = selectProduct("delete");
@@ -153,11 +158,13 @@ public class Main {
                 String pId2 = input.nextLine();
                 Product p1 = flipzon.getProduct(pId1);
                 Product p2 = flipzon.getProduct(pId2);
-                System.out.print("Combined Giveaway Price (in Rs.): ");
-                float price = input.nextFloat();
+                System.out.print("Combined Giveaway Price for Elite, Prime, and Normal Customers respectively (in Rs.): ");
+                float e = input.nextFloat();
+                float p = input.nextFloat();
+                float n = input.nextFloat();
                 if (isNull(p1, pId1) || isNull(p2, pId2))
                     continue;
-                Admin.addDeal(flipzon, p1, p2, price);
+                Admin.addDeal(flipzon, p1, p2, new float[] {e, p, n});
             }
             else {
                 System.out.println("Thanks for using Admin Mode, " + flipzon.getAdmin().getUsername() + "!");
@@ -170,15 +177,15 @@ public class Main {
         System.out.println("Welcome to Customer Mode!");
 
         while (true) {
-            System.out.println("Please select an action:");
+            System.out.println("\nPlease select an action:");
             System.out.println("1. Sign-Up as a new Customer");
             System.out.println("2. Log-In as an existing Customer");
             System.out.println("3. Back");
             int choice = inputChoice(3);
+            input.nextLine();
 
             if (choice == 1) {
-                input.nextLine();
-                System.out.println("Dear customer, Enter the following details:");
+                System.out.println("Dear customer, please enter the following details:");
                 System.out.print("Name: ");
                 String name = input.nextLine();
                 System.out.print("Password: ");
@@ -209,7 +216,7 @@ public class Main {
         customer.manageCart(flipzon);
 
         while (true) {
-            System.out.println("Please select an action:");
+            System.out.println("\nPlease select an action:");
             System.out.println(" 1. Browse available Products");
             System.out.println(" 2. Browse available Deals");
             System.out.println(" 3. Add a Product to Cart");
@@ -231,6 +238,7 @@ public class Main {
                 flipzon.exploreDeals();
             }
             else if (choice == 3) {
+                input.nextLine();
                 System.out.println("Enter the following details about the Product you want to add to Cart:");
                 System.out.print("Enter Product ID: ");
                 String pId = input.nextLine();
@@ -241,6 +249,7 @@ public class Main {
                 flipzon.addToCart(customer, pId, pName, quantity);
             }
             else if (choice == 4) {
+                input.nextLine();
                 System.out.println("Enter the following details about the Deal you want to add to cart:");
                 System.out.print("Enter Deal ID: ");
                 String pId = input.nextLine();
@@ -252,7 +261,7 @@ public class Main {
                 customer.viewCoupons();
             }
             else if (choice == 6) {
-                System.out.println("Your current Account Balance is: Rs. " + customer.getBalance());
+                System.out.println("Your current Account Balance is: Rs. " + customer.getBalance() + "/-");
             }
             else if (choice == 7) {
                 customer.viewCart();
@@ -263,11 +272,13 @@ public class Main {
                 else {
                     System.out.println("Do you really want to empty your cart? This action is IRREVERSIBLE!");
                     System.out.println("Please select an action:");
-                    System.out.println("1. Confirm empty cart");
+                    System.out.println("1. Confirm empty Cart");
                     System.out.println("2. Back");
                     int action = inputChoice(2);
-                    if (action == 1)
+                    if (action == 1) {
                         customer.emptyCart();
+                        System.out.println("Your Cart has been emptied successfully!");
+                    }
                 }
             }
             else if (choice == 9) {
@@ -294,7 +305,7 @@ public class Main {
                 System.out.println("Amount added to wallet successfully!");
             }
             else {
-                System.out.println("Logging Out, " + customer.getName() + "!");
+                System.out.println("Logging-Out, " + customer.getName() + "!");
                 break;
             }
         }
@@ -302,17 +313,20 @@ public class Main {
 
     private static boolean deleteItemMenu(Customer customer) {
         while (true) {
-            System.out.println("Please select an action:");
+            System.out.println("\nPlease select an action:");
             System.out.println("1. Delete Items from your Cart");
             System.out.println("2. Proceed to Checkout");
             int choice = inputChoice(2);
             if (choice == 1) {
+                input.nextLine();
                 System.out.println("Enter the details of the Product you wish to remove from your Cart!");
                 System.out.print("Product ID: ");
                 String pId = input.nextLine();
                 System.out.print("Product Name: ");
                 String pName = input.nextLine();
-                customer.removeFromCart(pId, pName);
+                System.out.print("Quantity: ");
+                int quantity = input.nextInt();
+                customer.removeFromCart(pId, pName, quantity);
                 if (customer.isEmptyCart()) {
                     System.out.println("Your cart is now Empty!");
                     return false;
@@ -360,8 +374,40 @@ public class Main {
         flipzon = new Flipzon("Flipzon", new Admin("DVGT", "2021529"));
         System.out.println("Welcome to " + flipzon.getName() + ", the market at your doorstep!");
 
+        // Hard-coding a Test-Case
+
+        Category c1 = new Category("C-1", "Electronics");
+        Category c2 = new Category("C-2", "Appliances");
+        Category c3 = new Category("C-3", "Furniture");
+        Category dx = new Category("Dx0", "Deals");
+
+        Product p1 = new Product("1P-1", "Laptop",       67000,  5,   "OK");
+        Product p2 = new Product("1P-2", "iPhone",       125000, 1,   "OK");
+        Product p3 = new Product("1P-3", "Headphones",   6000,   10,  "OK");
+        Product p4 = new Product("2P-1", "Fridge",       78000,  5,   "OK");
+        Product p5 = new Product("2P-2", "TV",           200000, 20,  "OK");
+        Product p6 = new Product("2P-3", "Microwave",    50500,  10,  "OK");
+        Product p7 = new Product("3P-1", "Sofa Set",     40000,  5,   "OK");
+        Product p8 = new Product("3P-2", "Dining Table", 54000,  10,  "OK");
+        Product p9 = new Product("3P-3", "Curtains",     1200,   100, "OK");
+        Product d1 = new Product(1, p1, p2, new float[] {100000, 110000, 10000});
+        Product d2 = new Product(2, p4, p1, new float[] {10000, 15000, 20000});
+        Product d3 = new Product(3, p7, p8, new float[] {10000, 15000, 20000});
+        p5.setDiscounts(new float[] {20, 15, 10});
+        p6.setDiscounts(new float[] {10, 9, 8});
+        p9.setDiscounts(new float[] {15.5f, 12.4f, 2});
+
+        c1.addProduct(p1); c2.addProduct(p4); c3.addProduct(p7); dx.addProduct(d1);
+        c1.addProduct(p2); c2.addProduct(p5); c3.addProduct(p8); dx.addProduct(d2);
+        c1.addProduct(p3); c2.addProduct(p6); c3.addProduct(p9); dx.addProduct(d3);
+        flipzon.addCategory(c1); flipzon.addCategory(c2); flipzon.addCategory(c3); flipzon.addCategory(dx);
+
+        Customer n1 = new Normal("Div", "Div123");
+        Customer n2 = new Normal("Asm", "Asm123");
+        flipzon.addCustomer(n1); flipzon.addCustomer(n2);
+
         while (true) {
-            System.out.println("Please select an action:");
+            System.out.println("\nPlease select an action:");
             System.out.println("1. Enter as an Admin");
             System.out.println("2. Explore the Product Catalogue");
             System.out.println("3. Show Available Deals");
@@ -371,7 +417,7 @@ public class Main {
 
             if (choice == 1) {
                 if (adminLogIn()) {
-                    System.out.println("Logging-In as Admin!");
+                    System.out.println("\nLogging-In as Admin!");
                     adminMode();
                 }
                 else

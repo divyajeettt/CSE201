@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public abstract class Customer {
@@ -102,14 +103,14 @@ public abstract class Customer {
             }
         }
         if (isUpdated) {
-            System.out.println("Your Cart is been modified! Here is your updated Cart!");
+            System.out.println("Your Cart has been modified! Here is your updated Cart!");
             this.viewCart();
         }
     }
 
     public void viewCart() {
         if (this.isEmptyCart())
-            System.out.println("Your cart is empty!");
+            System.out.println("Your Cart is empty!");
         else {
             int products = 0;
             int deals = 0;
@@ -119,7 +120,7 @@ public abstract class Customer {
                     deals++;
                 else
                     products++;
-                System.out.println(type + (product.getId().contains("D-") ? deals : products) + ":");
+                System.out.println(type + " " + (product.getId().contains("D-") ? deals : products) + ":");
                 System.out.println(product);
             }
         }
@@ -129,19 +130,27 @@ public abstract class Customer {
         this.cart.clear();
     }
 
-    public void removeFromCart(String pId, String pName) {
+    public void removeFromCart(String pId, String pName, int quantity) {
         if (!this.hasInCart(pId))
-            System.out.println("Item " + pName + " does not exist in your Cart");
+            System.out.println("Item " + pName + " does not exist in your Cart!");
         else {
-            this.cart.remove(pId);
-            System.out.println("Item " + pName + " removed from your Cart successfully!");
+            int inCart = this.cart.get(pId).getQuantity();
+            if (quantity > inCart)
+                System.out.println("There are only " + inCart + " " + pName + "(s) in your Cart!");
+            else {
+                this.cart.get(pId).setQuantity(inCart - quantity);
+                if (this.cart.get(pId).getQuantity() == 0)
+                    this.cart.remove(pId);
+                System.out.println(quantity + " " + pName + "(s) removed from your Cart successfully!");
+            }
         }
     }
 
     public void addCoupons(int numCoupons) {
-        int newCoupons = (int) (Math.random()*(5-3+1) + 3);
         for (int i=0; i < numCoupons; i++) {
-            float newCoupon = Math.round(2 * (Math.random()*(16-5+1) + 5)) / 2.0f;
+            float newCoupon = ThreadLocalRandom.current().nextInt(5, 15+1);
+            if (Math.random() >= 0.5f)
+                newCoupon += 0.5f;
             this.coupons.add(newCoupon);
             System.out.println("You have won a Coupon of " + newCoupon + "%!");
         }
@@ -160,8 +169,10 @@ public abstract class Customer {
             if (!usedCoupon && maxDiscount == coupon && !product.getId().contains("D-"))
                 usedCoupon = true;
         }
-        if (coupon != 0 && usedCoupon)
+        if (coupon != 0 && usedCoupon) {
+            System.out.println("Used a Coupon of " + coupon + "%!");
             this.coupons.remove(coupon);
+        }
         return total;
     }
 
@@ -177,8 +188,8 @@ public abstract class Customer {
                 "Delivery Charges: Rs. 100 + " + extraDeliveryCharge + "% of " + price + " = Rs. " + deliveryCharge + "/-"
             );
         else
-            System.out.println("Delivery Charges: Rs. 100/-");
-        System.out.println("Final Amount: Rs. " + finalTotal);
+            System.out.println("Delivery Charges: Rs. 100.0/-");
+        System.out.println("Final Amount: Rs. " + finalTotal + "/-");
         flipzon.placeOrder(this, finalTotal);
     }
 }
@@ -212,7 +223,7 @@ class Normal extends Customer {
 
     @Override
     public int getDeliveryTime() {
-        return ((int) (Math.random()*(11-7+1) + 7));
+        return ThreadLocalRandom.current().nextInt(7, 10+1);
     }
 
     @Override
@@ -244,12 +255,12 @@ class Prime extends Customer {
 
     @Override
     public int getDeliveryTime() {
-        return ((int) (Math.random()*(7-3+1) + 3));
+        return ThreadLocalRandom.current().nextInt(3, 6+1);
     }
 
     @Override
     public int getNumCoupons() {
-        return ((int) (Math.random()*(3-1+1) + 1));
+        return ThreadLocalRandom.current().nextInt(1, 2+1);
     }
 }
 
@@ -281,7 +292,7 @@ class Elite extends Customer {
 
     @Override
     public int getNumCoupons() {
-        return ((int) (Math.random()*(5-3+1) + 1));
+        return ThreadLocalRandom.current().nextInt(3, 4+1);
     }
 
     @Override
@@ -297,6 +308,9 @@ class Elite extends Customer {
 
             System.out.println("You have won the following free Product from " + flipzon.getName() + "!");
             System.out.println(product);
+            flipzon.getProduct(product.getId()).setQuantity(product.getQuantity() - 1);
+            if (flipzon.getProduct(product.getId()).getQuantity() == 0)
+                flipzon.deleteProduct(product.getId());
         }
     }
 }

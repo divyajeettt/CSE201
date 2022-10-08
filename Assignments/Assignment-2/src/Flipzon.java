@@ -71,6 +71,15 @@ public class Flipzon {
         this.categories.get(cId).deleteProduct(pId);
     }
 
+    public void deleteProduct(String pId) {
+        for (Category category: this.categories.values()) {
+            if (category.hasProduct(pId)) {
+                this.categories.get(category.getId()).deleteProduct(pId);
+                break;
+            }
+        }
+    }
+
     public void setDiscounts(String pId, String cId, float[] discounts) {
         this.categories.get(cId).getProducts().get(pId).setDiscounts(discounts);
     }
@@ -154,11 +163,24 @@ public class Flipzon {
         if (customer.affords(total)) {
             customer.deductBalance(total);
             System.out.println("Your order has been placed!");
-            System.out.println("An amount of Rs. " + total + "/- has been deducted from your Wallet!");
+            System.out.println(
+                "An amount of Rs. " + total + "/- has been deducted from your Wallet! "
+                + "Current Balance: Rs. " + customer.getBalance() + "/-"
+            );
             System.out.println("Your order will be delivered in " + customer.getDeliveryTime() + " days!");
             for (String pId: customer.getCart().keySet()) {
                 Product product = this.getProduct(pId);
-                product.setQuantity(product.getQuantity() - customer.getCart().get(pId).getQuantity());
+                if (pId.contains("D-")) {
+                    for (Product dealProduct: product.getDealProducts())
+                        this.getProduct(dealProduct.getId()).setQuantity(dealProduct.getQuantity() - 1);
+                }
+                else {
+                    product.setQuantity(product.getQuantity() - customer.getCart().get(pId).getQuantity());
+                    if (product.getQuantity() <= 0) {
+                        this.categories.remove(pId);
+                        System.out.println("Product " + product.getName() + " is no longer available! All Sold Out!");
+                    }
+                }
             }
             customer.emptyCart();
             if (total > 5000)
@@ -184,7 +206,10 @@ public class Flipzon {
             this.customers.remove(customer);
             this.addCustomer(shifted);
             if (price != 0)
-                System.out.println("An amount of Rs. " + price + "/- has been deducted from your Wallet!");
+                System.out.println(
+                    "An amount of Rs. " + price + "/- has been deducted from your Wallet! "
+                    + "Current Balance: Rs. " + shifted.getBalance() + "/-"
+                );
             System.out.println(
                 "Dear " + customer.getName() + ", your status has been successfully changed to " + status + "!"
             );
