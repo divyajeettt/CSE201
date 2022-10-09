@@ -41,14 +41,19 @@ public class Main {
         String pId = input.nextLine();
         System.out.print("Product Name: ");
         String pName = input.nextLine();
-        System.out.print("Price (in Rs.): ");
-        float price = input.nextFloat();
         System.out.print("Quantity to add: ");
         int quantity = input.nextInt();
+        float price = 0;
+        String details = "";
+        if (!flipzon.hasProduct(pId, cId)) {
+            System.out.print("Price (in Rs.): ");
+            price = input.nextFloat();
+            details = inputDetails();
+        }
         if (addCategory)
-            Admin.addCategory(flipzon, cId, cName, new Product(pId, pName, price, quantity, inputDetails()));
+            Admin.addCategory(flipzon, cId, cName, new Product(pId, pName, price, quantity, details));
         else
-            Admin.addProduct(flipzon, cId, cName, pId, pName, price, quantity, inputDetails());
+            Admin.addProduct(flipzon, cId, cName, pId, pName, price, quantity, details);
     }
 
     private static HashMap<String, String> selectProduct(String action) {
@@ -71,9 +76,12 @@ public class Main {
         System.out.println("1. Delete the Category " + cName);
         System.out.println("2. Add a Product to the Category " + cName);
         int choice = inputChoice(2);
-        if (choice == 1)
+        if (choice == 1) {
+            Admin.deleteCategory(flipzon, cId, cName);
             return true;
+        }
         else {
+            input.nextLine();
             inputProduct(cId, cName, false, false);
             return false;
         }
@@ -108,8 +116,10 @@ public class Main {
             System.out.println("4. Delete a Product");
             System.out.println("5. Set discount on a Product");
             System.out.println("6. Add a Giveaway Deal");
-            System.out.println("7. Back");
-            int choice = inputChoice(7);
+            System.out.println("7. View existing Products");
+            System.out.println("8. View existing Deals");
+            System.out.println("9. Back");
+            int choice = inputChoice(9);
             input.nextLine();
 
             if (choice == 1) {
@@ -166,6 +176,12 @@ public class Main {
                     continue;
                 Admin.addDeal(flipzon, p1, p2, new float[] {e, p, n});
             }
+            else if (choice == 7) {
+                flipzon.exploreCatalogue();
+            }
+            else if (choice == 8) {
+                flipzon.exploreDeals(3);
+            }
             else {
                 System.out.println("Thanks for using Admin Mode, " + flipzon.getAdmin().getName() + "!");
                 break;
@@ -190,17 +206,22 @@ public class Main {
                 String name = input.nextLine();
                 System.out.print("Password: ");
                 String password = input.nextLine();
-                flipzon.addCustomer(new Normal(name, password));
-                System.out.println("Customer Signed-Up successfully!");
+                if (flipzon.getCustomer(name, password) != null)
+                    System.out.println("Customer " + name + " already exists!");
+                else {
+                    flipzon.addCustomer(new Normal(name, password));
+                    System.out.println("Customer Signed-Up successfully!");
+                }
             }
             else if (choice == 2) {
-                System.out.println("Dear customer, Enter the following details:");
+                System.out.println("Dear customer, please enter the following details:");
                 System.out.print("Name: ");
                 String name = input.nextLine();
                 System.out.print("Password: ");
                 String password = input.nextLine();
-                if (flipzon.hasCustomer(name, password))
-                    customerMode(flipzon.getCustomer(name, password));
+                Customer customer = flipzon.getCustomer(name, password);
+                if (customer != null)
+                    customerMode(customer);
                 else
                     System.out.println("Invalid Credentials! Cannot Log-In as " + name + "!");
             }
@@ -244,9 +265,13 @@ public class Main {
                 String pId = input.nextLine();
                 System.out.print("Enter Product name: ");
                 String pName = input.nextLine();
-                System.out.print("Enter quantity: ");
-                int quantity = input.nextInt();
-                flipzon.addToCart(customer, pId, pName, quantity);
+                if (pId.contains("D-"))
+                    System.out.println("Product with ID " + pId + " does not exist!");
+                else {
+                    System.out.print("Enter quantity: ");
+                    int quantity = input.nextInt();
+                    flipzon.addToCart(customer, pId, pName, quantity);
+                }
             }
             else if (choice == 4) {
                 input.nextLine();
@@ -376,35 +401,35 @@ public class Main {
 
         // Hard-coding a Test-Case
 
-//        Category c1 = new Category("C-1", "Electronics");
-//        Category c2 = new Category("C-2", "Appliances");
-//        Category c3 = new Category("C-3", "Furniture");
-//        Category dx = new Category("Dx0", "Deals");
-//
-//        Product p1 = new Product("1P-1", "Laptop",       67000,  5,   "OK");
-//        Product p2 = new Product("1P-2", "iPhone",       125000, 1,   "OK");
-//        Product p3 = new Product("1P-3", "Headphones",   6000,   10,  "OK");
-//        Product p4 = new Product("2P-1", "Fridge",       78000,  5,   "OK");
-//        Product p5 = new Product("2P-2", "TV",           200000, 20,  "OK");
-//        Product p6 = new Product("2P-3", "Microwave",    50500,  10,  "OK");
-//        Product p7 = new Product("3P-1", "Sofa Set",     40000,  5,   "OK");
-//        Product p8 = new Product("3P-2", "Dining Table", 54000,  10,  "OK");
-//        Product p9 = new Product("3P-3", "Curtains",     1200,   100, "OK");
-//        Product d1 = new Product(1, p1, p2, new float[] {100000, 110000, 10000});
-//        Product d2 = new Product(2, p4, p1, new float[] {10000, 15000, 20000});
-//        Product d3 = new Product(3, p7, p8, new float[] {10000, 15000, 20000});
-//        p5.setDiscounts(new float[] {20, 15, 10});
-//        p6.setDiscounts(new float[] {10, 9, 8});
-//        p9.setDiscounts(new float[] {15.5f, 12.4f, 2});
-//
-//        c1.addProduct(p1); c2.addProduct(p4); c3.addProduct(p7); dx.addProduct(d1);
-//        c1.addProduct(p2); c2.addProduct(p5); c3.addProduct(p8); dx.addProduct(d2);
-//        c1.addProduct(p3); c2.addProduct(p6); c3.addProduct(p9); dx.addProduct(d3);
-//        flipzon.addCategory(c1); flipzon.addCategory(c2); flipzon.addCategory(c3); flipzon.addCategory(dx);
+        // Category c1 = new Category("C-1", "Electronics");
+        // Category c2 = new Category("C-2", "Appliances");
+        // Category c3 = new Category("C-3", "Furniture");
+        // Category dx = new Category("Dx0", "Deals");
 
-//        Customer n1 = new Normal("Div", "Div123");
-//        Customer n2 = new Normal("Asm", "Asm123");
-//        flipzon.addCustomer(n1); flipzon.addCustomer(n2);
+        // Product p1 = new Product("1P-1", "Laptop",       67000,  5,   "OK");
+        // Product p2 = new Product("1P-2", "iPhone",       125000, 1,   "OK");
+        // Product p3 = new Product("1P-3", "Headphones",   6000,   10,  "OK");
+        // Product p4 = new Product("2P-1", "Fridge",       78000,  5,   "OK");
+        // Product p5 = new Product("2P-2", "TV",           200000, 20,  "OK");
+        // Product p6 = new Product("2P-3", "Microwave",    50500,  10,  "OK");
+        // Product p7 = new Product("3P-1", "Sofa Set",     40000,  5,   "OK");
+        // Product p8 = new Product("3P-2", "Dining Table", 54000,  10,  "OK");
+        // Product p9 = new Product("3P-3", "Curtains",     1200,   100, "OK");
+        // Product d1 = new Product(1, p1, p2, new float[] {100000, 110000, 120000});
+        // Product d2 = new Product(2, p4, p1, new float[] {10000, 15000, 20000});
+        // Product d3 = new Product(3, p7, p8, new float[] {10000, 15000, 20000});
+        // p5.setDiscounts(new float[] {20, 15, 10});
+        // p6.setDiscounts(new float[] {10, 9, 8});
+        // p9.setDiscounts(new float[] {15.5f, 12.5f, 2});
+
+        // c1.addProduct(p1); c2.addProduct(p4); c3.addProduct(p7); dx.addProduct(d1);
+        // c1.addProduct(p2); c2.addProduct(p5); c3.addProduct(p8); dx.addProduct(d2);
+        // c1.addProduct(p3); c2.addProduct(p6); c3.addProduct(p9); dx.addProduct(d3);
+        // flipzon.addCategory(c1); flipzon.addCategory(c2); flipzon.addCategory(c3); flipzon.addCategory(dx);
+
+        // Customer n1 = new Normal("Div", "Div123");
+        // Customer n2 = new Normal("Asm", "Asm123");
+        // flipzon.addCustomer(n1); flipzon.addCustomer(n2);
 
         while (true) {
             System.out.println("\nPlease select an action:");

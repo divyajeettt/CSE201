@@ -104,4 +104,8 @@ public class Product {
     public void setDiscounts(float[] discounts) {
         System.arraycopy(discounts, 0, this.discounts, 0, 3);
     }
+
+    public boolean isDeal() {
+        return this.id.contains("D-");
+    }
 }

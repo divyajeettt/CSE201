@@ -94,7 +94,13 @@ public abstract class Customer {
         boolean isUpdated = false;
         for (String pId: this.cart.keySet()) {
             Product product = this.cart.get(pId);
-            int available = flipzon.getProduct(product.getId()).getQuantity();
+            if (flipzon.getProduct(pId) == null) {
+                System.out.println("Sorry, we are currently short on Stock of " + product.getName() + "(s)!");
+                this.cart.remove(pId);
+                isUpdated = true;
+                continue;
+            }
+            int available = flipzon.getProduct(pId).getQuantity();
             int inCart = product.getQuantity();
             if (available < inCart) {
                 System.out.println("Sorry, we are currently short on Stock of " + product.getName() + "(s)!");
@@ -112,20 +118,21 @@ public abstract class Customer {
         if (this.isEmptyCart())
             System.out.println("Your Cart is empty!");
         else {
-            int products = 0;
-            int deals = 0;
+            int numProducts = 0;
             for (Product product: this.cart.values()) {
-                String type = (product.getId().contains("D-") ? "Deal" : "Product");
-                if (type.equals("Deal")) {
-                    deals++;
-                    System.out.println("Deal " + deals + ":");
-                    System.out.println(product.print(this.getStatus()));
-                }
-                else {
-                    products++;
-                    System.out.println("Product " + products + ":");
-                    System.out.println(product);
-                }
+                if (product.isDeal())
+                    continue;
+                numProducts++;
+                System.out.println("Product " + numProducts + ":");
+                System.out.println(product);
+            }
+            int numDeals = 0;
+            for (Product deal: this.cart.values()) {
+                if (!deal.isDeal())
+                    continue;
+                numDeals++;
+                System.out.println("Deal " + numDeals + ":");
+                System.out.println(deal.print(this.getStatus()));
             }
         }
     }
@@ -164,14 +171,14 @@ public abstract class Customer {
         float total = 0.0f;
         boolean usedCoupon = false;
         for (Product product: this.cart.values()) {
-            if (product.getId().contains("D-")) {
+            if (product.isDeal()) {
                 total += product.getPrice(this.getStatus());
                 continue;
             }
             float price = product.getPrice() * product.getQuantity();
             float maxDiscount = Math.max(this.discount, Math.max(coupon, this.getDiscount(product)));
             total += price - maxDiscount / 100.0f * price;
-            if (!usedCoupon && maxDiscount == coupon && !product.getId().contains("D-"))
+            if (!usedCoupon && maxDiscount == coupon && !product.isDeal())
                 usedCoupon = true;
         }
         if (coupon != 0 && usedCoupon) {
@@ -303,7 +310,7 @@ class Elite extends Customer {
     @Override
     public void getFreeProduct(Flipzon flipzon) {
         if (Math.random() >= 0.5f) {
-            List<Category> categoryList = new ArrayList<>(flipzon.getCategories().values());
+            List<Category> categoryList = new ArrayList<>(flipzon.getCategoryList());
             int luckyIndex = new Random().nextInt(categoryList.size());
             Category category = categoryList.get(luckyIndex);
             if (category.getId().equals("Dx0"))
@@ -313,7 +320,7 @@ class Elite extends Customer {
             luckyIndex = new Random().nextInt(productList.size());
             Product product = productList.get(luckyIndex);
 
-            System.out.println("You have won the following free Product from " + flipzon.getName() + "!");
+            System.out.println("You have won ONE piece of the following free Product from " + flipzon.getName() + "!");
             System.out.println(product);
             flipzon.getProduct(product.getId()).setQuantity(product.getQuantity() - 1);
             if (flipzon.getProduct(product.getId()).getQuantity() == 0)

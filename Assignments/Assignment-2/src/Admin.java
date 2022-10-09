@@ -62,22 +62,12 @@ public class Admin {
         if (!flipzon.hasCategory(cId))
             System.out.println("Category " + cName + " does not exist!");
         else if (!flipzon.hasProduct(pId, cId))
-            System.out.println("Product " + pName + " does not exist!");
+            System.out.println("Product " + pName + " does not exist in Category " + cName + "!");
         else {
-            Product product = flipzon.getProduct(pId, cId);
             flipzon.deleteProduct(pId, cId);
             System.out.println("All stock of Product " + pName + " deleted successfully!");
-            if (flipzon.getProducts(cId).size() == 0) {
-                if (Main.handleEmptyCategory(cId, cName))
-                    deleteCategory(flipzon, cId, cName);
-            }
-            for (Product deal: flipzon.getProducts("Dx0").values()) {
-                Product[] dealProducts = deal.getDealProducts();
-                if (product.getId().equals(dealProducts[0].getId()) || product.getId().equals(dealProducts[1].getId())) {
-                    System.out.println("Deal " + deal.getId() + " is now invalid!");
-                    flipzon.deleteProduct(deal.getId(), "Dx0");
-                }
-            }
+            flipzon.manageCategories();
+            flipzon.manageDeals();
         }
     }
 
