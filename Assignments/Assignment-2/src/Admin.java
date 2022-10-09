@@ -1,5 +1,3 @@
-import javax.sound.sampled.Port;
-
 public class Admin implements User {
     private final String username;
     private final String password;
