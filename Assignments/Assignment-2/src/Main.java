@@ -98,7 +98,7 @@ public class Main {
     }
 
     private static void adminMode() {
-        System.out.println("Welcome " + flipzon.getAdmin().getUsername() + "!");
+        System.out.println("Welcome " + flipzon.getAdmin().getName() + "!");
 
         while (true) {
             System.out.println("\nPlease select an action:");
@@ -167,7 +167,7 @@ public class Main {
                 Admin.addDeal(flipzon, p1, p2, new float[] {e, p, n});
             }
             else {
-                System.out.println("Thanks for using Admin Mode, " + flipzon.getAdmin().getUsername() + "!");
+                System.out.println("Thanks for using Admin Mode, " + flipzon.getAdmin().getName() + "!");
                 break;
             }
         }

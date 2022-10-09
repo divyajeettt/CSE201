@@ -1,18 +1,18 @@
 public class Admin {
-    private final String username;
+    private final String name;
     private final String password;
 
-    public Admin(String username, String password) {
-        this.username = username;
+    public Admin(String name, String password) {
+        this.name = name;
         this.password = password;
     }
 
-    public String getUsername() {
-        return this.username;
+    public String getName() {
+        return this.name;
     }
 
-    public boolean matchCredentials(String username, String password) {
-        return (this.username.equals(username) && this.password.equals(password));
+    public boolean matchCredentials(String name, String password) {
+        return (this.name.equals(name) && this.password.equals(password));
     }
 
     public static boolean checkDealPrices(Product p1, Product p2, float[] dealPrices) {
@@ -64,16 +64,26 @@ public class Admin {
         else if (!flipzon.hasProduct(pId, cId))
             System.out.println("Product " + pName + " does not exist!");
         else {
+            Product product = flipzon.getProduct(pId, cId);
             flipzon.deleteProduct(pId, cId);
-            System.out.println("Product " + pName + " deleted successfully!");
+            System.out.println("All stock of Product " + pName + " deleted successfully!");
             if (flipzon.getProducts(cId).size() == 0) {
                 if (Main.handleEmptyCategory(cId, cName))
                     deleteCategory(flipzon, cId, cName);
             }
+            for (Product deal: flipzon.getProducts("Dx0").values()) {
+                Product[] dealProducts = deal.getDealProducts();
+                if (product.getId().equals(dealProducts[0].getId()) || product.getId().equals(dealProducts[1].getId())) {
+                    System.out.println("Deal " + deal.getId() + " is now invalid!");
+                    flipzon.deleteProduct(deal.getId(), "Dx0");
+                }
+            }
         }
     }
 
-    public static void setDiscounts(Flipzon flipzon, String cId, String cName, String pId, String pName, float[] discounts) {
+    public static void setDiscounts(
+        Flipzon flipzon, String cId, String cName, String pId, String pName, float[] discounts
+    ) {
         if (!flipzon.hasCategory(cId)) {
             System.out.println("Category " + cName + " does not exist!");
             return;

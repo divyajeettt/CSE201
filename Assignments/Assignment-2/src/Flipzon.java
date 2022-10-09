@@ -47,6 +47,10 @@ public class Flipzon {
         return null;
     }
 
+    public Product getProduct(String pId, String cId) {
+        return this.categories.get(cId).getProducts().get(pId);
+    }
+
     public boolean hasCategory(String cId) {
         return this.categories.containsKey(cId);
     }
@@ -81,7 +85,7 @@ public class Flipzon {
     }
 
     public void setDiscounts(String pId, String cId, float[] discounts) {
-        this.categories.get(cId).getProducts().get(pId).setDiscounts(discounts);
+        this.getProduct(pId, cId).setDiscounts(discounts);
     }
 
     public void addCustomer(Customer customer) {
