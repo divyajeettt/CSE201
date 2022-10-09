@@ -4,12 +4,12 @@ import java.util.*;
 public class Category {
     private final String id;
     private final String name;
-    private HashMap<String, Product> products;
+    private HashMap<String, Item> items;
 
     public Category(String id, String name) {
         this.id = id;
         this.name = name;
-        this.products = new HashMap<>();
+        this.items = new HashMap<>();
     }
 
     public String getId() {
@@ -20,23 +20,23 @@ public class Category {
         return this.name;
     }
 
-    public HashMap<String, Product> getProducts() {
-        return this.products;
+    public HashMap<String, Item> getProducts() {
+        return this.items;
     }
 
-    public Collection<Product> getProductList() {
-        return this.products.values();
+    public Collection<Item> getProductList() {
+        return this.items.values();
     }
 
     public boolean hasProduct(String pId) {
-        return this.products.containsKey(pId);
+        return this.items.containsKey(pId);
     }
 
-    public void addProduct(Product product) {
-        this.products.put(product.getId(), product);
+    public void addProduct(Item product) {
+        this.items.put(product.getId(), product);
     }
 
     public void deleteProduct(String pId) {
-        this.products.remove(pId);
+        this.items.remove(pId);
     }
 }

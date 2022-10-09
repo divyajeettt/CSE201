@@ -166,8 +166,8 @@ public class Main {
                 String pId1 = input.nextLine();
                 System.out.print("Product ID 2: ");
                 String pId2 = input.nextLine();
-                Product p1 = flipzon.getProduct(pId1);
-                Product p2 = flipzon.getProduct(pId2);
+                Product p1 = (Product) flipzon.getProduct(pId1);
+                Product p2 = (Product) flipzon.getProduct(pId2);
                 System.out.print("Combined Giveaway Price for Elite, Prime, and Normal Customers respectively (in Rs.): ");
                 float e = input.nextFloat();
                 float p = input.nextFloat();
@@ -219,9 +219,9 @@ public class Main {
                 String name = input.nextLine();
                 System.out.print("Password: ");
                 String password = input.nextLine();
-                Customer customer = flipzon.getCustomer(name, password);
+                User customer = flipzon.getCustomer(name, password);
                 if (customer != null)
-                    customerMode(customer);
+                    customerMode((Customer) customer);
                 else
                     System.out.println("Invalid Credentials! Cannot Log-In as " + name + "!");
             }
@@ -368,18 +368,29 @@ public class Main {
             System.out.println("Choose new Status (the cost of membership is mentioned alongside):");
             System.out.println("1. Prime (Rs. 200/- per Month)");
             System.out.println("2. Elite (Rs. 300/- per Month)");
-            if (inputChoice(2) == 1)
-                return flipzon.shiftStatus(customer, "Prime", 200.0f);
+            int choice = inputChoice(2);
+            System.out.println("Choose mode of subscription:");
+            System.out.println("1. Monthly");
+            System.out.println("2. Yearly");
+            int scale = ((inputChoice(2) == 1) ? 1 : 12);
+            if (choice == 1)
+                return flipzon.shiftStatus(customer, "Prime", scale*200.0f);
             else
-                return flipzon.shiftStatus(customer, "Elite", 300.0f);
+                return flipzon.shiftStatus(customer, "Elite", scale*300.0f);
         }
         else if (customer.getStatus() == 1) {
             System.out.println("Current Status: Prime");
             System.out.println("Choose new Status (the cost of membership is mentioned alongside):");
             System.out.println("1. Elite (Rs. 100/- per Month)");
             System.out.println("2. Normal (Non-Refundable)");
-            if (inputChoice(2) == 1)
-                return flipzon.shiftStatus(customer, "Elite", 100.0f);
+            int choice = inputChoice(2);
+            if (choice == 1) {
+                System.out.println("Choose mode of subscription:");
+                System.out.println("1. Monthly");
+                System.out.println("2. Yearly");
+                int scale = ((inputChoice(2) == 1) ? 1 : 12);
+                return flipzon.shiftStatus(customer, "Elite", scale*100.0f);
+            }
             else
                 return flipzon.shiftStatus(customer, "Normal", 0.0f);
         }
@@ -388,7 +399,8 @@ public class Main {
             System.out.println("Choose new Status (the cost of membership is mentioned alongside):");
             System.out.println("1. Normal (Non-Refundable)");
             System.out.println("2. Prime (Non-Refundable)");
-            if (inputChoice(2) == 1)
+            int choice = inputChoice(2);
+            if (choice == 1)
                 return flipzon.shiftStatus(customer, "Normal", 0.0f);
             else
                 return flipzon.shiftStatus(customer, "Prime", 0.0f);
@@ -396,40 +408,41 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        flipzon = new Flipzon("Flipzon", new Admin("DVGT", "2021529"));
+        User admin = new Admin("DVGT", "2021529");
+        flipzon = new Flipzon("Flipzon", admin);
         System.out.println("Welcome to " + flipzon.getName() + ", the market at your doorstep!");
 
-        // Hard-coding a Test-Case
-
-        // Category c1 = new Category("C-1", "Electronics");
-        // Category c2 = new Category("C-2", "Appliances");
-        // Category c3 = new Category("C-3", "Furniture");
-        // Category dx = new Category("Dx0", "Deals");
-
-        // Product p1 = new Product("1P-1", "Laptop",       67000,  5,   "OK");
-        // Product p2 = new Product("1P-2", "iPhone",       125000, 1,   "OK");
-        // Product p3 = new Product("1P-3", "Headphones",   6000,   10,  "OK");
-        // Product p4 = new Product("2P-1", "Fridge",       78000,  5,   "OK");
-        // Product p5 = new Product("2P-2", "TV",           200000, 20,  "OK");
-        // Product p6 = new Product("2P-3", "Microwave",    50500,  10,  "OK");
-        // Product p7 = new Product("3P-1", "Sofa Set",     40000,  5,   "OK");
-        // Product p8 = new Product("3P-2", "Dining Table", 54000,  10,  "OK");
-        // Product p9 = new Product("3P-3", "Curtains",     1200,   100, "OK");
-        // Product d1 = new Product(1, p1, p2, new float[] {100000, 110000, 120000});
-        // Product d2 = new Product(2, p4, p1, new float[] {10000, 15000, 20000});
-        // Product d3 = new Product(3, p7, p8, new float[] {10000, 15000, 20000});
-        // p5.setDiscounts(new float[] {20, 15, 10});
-        // p6.setDiscounts(new float[] {10, 9, 8});
-        // p9.setDiscounts(new float[] {15.5f, 12.5f, 2});
-
-        // c1.addProduct(p1); c2.addProduct(p4); c3.addProduct(p7); dx.addProduct(d1);
-        // c1.addProduct(p2); c2.addProduct(p5); c3.addProduct(p8); dx.addProduct(d2);
-        // c1.addProduct(p3); c2.addProduct(p6); c3.addProduct(p9); dx.addProduct(d3);
-        // flipzon.addCategory(c1); flipzon.addCategory(c2); flipzon.addCategory(c3); flipzon.addCategory(dx);
-
-        // Customer n1 = new Normal("Div", "Div123");
-        // Customer n2 = new Normal("Asm", "Asm123");
-        // flipzon.addCustomer(n1); flipzon.addCustomer(n2);
+//         Hard-coding a Test-Case
+//
+//         Category c1 = new Category("C-1", "Electronics");
+//         Category c2 = new Category("C-2", "Appliances");
+//         Category c3 = new Category("C-3", "Furniture");
+//         Category dx = new Category("Dx0", "Deals");
+//
+//         Product p1 = new Product("1P-1", "Laptop",       67000,  5,   "OK");
+//         Product p2 = new Product("1P-2", "iPhone",       125000, 1,   "OK");
+//         Product p3 = new Product("1P-3", "Headphones",   6000,   10,  "OK");
+//         Product p4 = new Product("2P-1", "Fridge",       78000,  5,   "OK");
+//         Product p5 = new Product("2P-2", "TV",           200000, 20,  "OK");
+//         Product p6 = new Product("2P-3", "Microwave",    50500,  10,  "OK");
+//         Product p7 = new Product("3P-1", "Sofa Set",     40000,  5,   "OK");
+//         Product p8 = new Product("3P-2", "Dining Table", 54000,  10,  "OK");
+//         Product p9 = new Product("3P-3", "Curtains",     1200,   100, "OK");
+//         Item d1 = new Deal(1, p1, p2, new float[] {100000, 110000, 120000});
+//         Item d2 = new Deal(2, p4, p1, new float[] {10000, 15000, 20000});
+//         Item d3 = new Deal(3, p7, p8, new float[] {10000, 15000, 20000});
+//         p5.setDiscounts(new float[] {20, 15, 10});
+//         p6.setDiscounts(new float[] {10, 9, 8});
+//         p9.setDiscounts(new float[] {15.5f, 12.5f, 10});
+//
+//         c1.addProduct(p1); c2.addProduct(p4); c3.addProduct(p7); dx.addProduct(d1);
+//         c1.addProduct(p2); c2.addProduct(p5); c3.addProduct(p8); dx.addProduct(d2);
+//         c1.addProduct(p3); c2.addProduct(p6); c3.addProduct(p9); dx.addProduct(d3);
+//         flipzon.addCategory(c1); flipzon.addCategory(c2); flipzon.addCategory(c3); flipzon.addCategory(dx);
+//
+//         Customer n1 = new Normal("Div", "Div123");
+//         Customer n2 = new Normal("Asm", "Asm123");
+//         flipzon.addCustomer(n1); flipzon.addCustomer(n2);
 
         while (true) {
             System.out.println("\nPlease select an action:");

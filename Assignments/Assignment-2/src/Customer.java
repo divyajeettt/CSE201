@@ -2,18 +2,18 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 
-public abstract class Customer {
+public abstract class Customer implements User {
     private final String name;
     private final String password;
     protected float balance = 1000.0f;
-    protected HashMap<String, Product> cart = new HashMap<>();
+    protected HashMap<String, Item> cart = new HashMap<>();
     protected ArrayList<Float> coupons = new ArrayList<>();
     protected float discount;
     protected float extraDeliveryCharge;
 
     public abstract int getDeliveryTime();
     public abstract int getStatus();
-    public abstract float getDiscount(Product product);
+    public abstract float getDiscount(Item item);
     public abstract int getNumCoupons();
     public void getFreeProduct(Flipzon flipzon) {}
 
@@ -38,7 +38,7 @@ public abstract class Customer {
         return this.balance;
     }
 
-    public HashMap<String, Product> getCart() {
+    public HashMap<String, Item> getCart() {
         return this.cart;
     }
 
@@ -51,7 +51,8 @@ public abstract class Customer {
     }
 
     public void incQuantity(String pId, int quantity) {
-        this.cart.get(pId).incQuantity(quantity);
+        Product product = (Product) this.cart.get(pId);
+        product.incQuantity(quantity);
     }
 
     public float getMaxCoupon() {
@@ -77,8 +78,8 @@ public abstract class Customer {
         this.balance -= price;
     }
 
-    public void addToCart(Product product) {
-        this.cart.put(product.getId(), product);
+    public void addToCart(Item item) {
+        this.cart.put(item.getId(), item);
     }
 
     public void viewCoupons() {
@@ -93,17 +94,17 @@ public abstract class Customer {
     public void manageCart(Flipzon flipzon) {
         boolean isUpdated = false;
         for (String pId: this.cart.keySet()) {
-            Product product = this.cart.get(pId);
+            Item item = this.cart.get(pId);
             if (flipzon.getProduct(pId) == null) {
-                System.out.println("Sorry, we are currently short on Stock of " + product.getName() + "(s)!");
+                System.out.println("Sorry, we are currently short on Stock of " + item.getName() + "(s)!");
                 this.cart.remove(pId);
                 isUpdated = true;
                 continue;
             }
             int available = flipzon.getProduct(pId).getQuantity();
-            int inCart = product.getQuantity();
+            int inCart = item.getQuantity();
             if (available < inCart) {
-                System.out.println("Sorry, we are currently short on Stock of " + product.getName() + "(s)!");
+                System.out.println("Sorry, we are currently short on Stock of " + item.getName() + "(s)!");
                 this.cart.get(pId).setQuantity(inCart - available);
                 isUpdated = true;
             }
@@ -119,15 +120,15 @@ public abstract class Customer {
             System.out.println("Your Cart is empty!");
         else {
             int numProducts = 0;
-            for (Product product: this.cart.values()) {
+            for (Item product: this.cart.values()) {
                 if (product.isDeal())
                     continue;
                 numProducts++;
                 System.out.println("Product " + numProducts + ":");
-                System.out.println(product);
+                System.out.println(product.print(3));
             }
             int numDeals = 0;
-            for (Product deal: this.cart.values()) {
+            for (Item deal: this.cart.values()) {
                 if (!deal.isDeal())
                     continue;
                 numDeals++;
@@ -170,15 +171,15 @@ public abstract class Customer {
     public float getCartPrice(float coupon) {
         float total = 0.0f;
         boolean usedCoupon = false;
-        for (Product product: this.cart.values()) {
-            if (product.isDeal()) {
-                total += product.getPrice(this.getStatus());
+        for (Item item: this.cart.values()) {
+            if (item.isDeal()) {
+                total += item.getPrice(this.getStatus());
                 continue;
             }
-            float price = product.getPrice() * product.getQuantity();
-            float maxDiscount = Math.max(this.discount, Math.max(coupon, this.getDiscount(product)));
+            float price = item.getPrice(3) * item.getQuantity();
+            float maxDiscount = Math.max(this.discount, Math.max(coupon, this.getDiscount(item)));
             total += price - maxDiscount / 100.0f * price;
-            if (!usedCoupon && maxDiscount == coupon && !product.isDeal())
+            if (!usedCoupon && maxDiscount == coupon && !item.isDeal())
                 usedCoupon = true;
         }
         if (coupon != 0 && usedCoupon) {
@@ -197,7 +198,7 @@ public abstract class Customer {
         System.out.println("Total Cost of Items: Rs. " + price + "/-");
         if (extraDeliveryCharge != 0)
             System.out.println(
-                "Delivery Charges: Rs. 100 + " + extraDeliveryCharge + "% of " + price + " = Rs. " + deliveryCharge + "/-"
+                    "Delivery Charges: Rs. 100 + " + extraDeliveryCharge + "% of " + price + " = Rs. " + deliveryCharge + "/-"
             );
         else
             System.out.println("Delivery Charges: Rs. 100.0/-");
@@ -229,8 +230,8 @@ class Normal extends Customer {
     }
 
     @Override
-    public float getDiscount(Product product) {
-        return product.getDiscount(2);
+    public float getDiscount(Item item) {
+        return item.getDiscount(2);
     }
 
     @Override
@@ -261,8 +262,8 @@ class Prime extends Customer {
     }
 
     @Override
-    public float getDiscount(Product product) {
-        return product.getDiscount(1);
+    public float getDiscount(Item item) {
+        return item.getDiscount(1);
     }
 
     @Override
@@ -293,8 +294,8 @@ class Elite extends Customer {
     }
 
     @Override
-    public float getDiscount(Product product) {
-        return product.getDiscount(0);
+    public float getDiscount(Item item) {
+        return item.getDiscount(0);
     }
 
     @Override
@@ -316,12 +317,12 @@ class Elite extends Customer {
             if (category.getId().equals("Dx0"))
                 return;
 
-            List<Product> productList = new ArrayList<>(category.getProductList());
+            List<Item> productList = new ArrayList<>(category.getProductList());
             luckyIndex = new Random().nextInt(productList.size());
-            Product product = productList.get(luckyIndex);
+            Product product = (Product) productList.get(luckyIndex);
 
             System.out.println("You have won ONE piece of the following free Product from " + flipzon.getName() + "!");
-            System.out.println(product);
+            System.out.println(product.print(3));
             flipzon.getProduct(product.getId()).setQuantity(product.getQuantity() - 1);
             if (flipzon.getProduct(product.getId()).getQuantity() == 0)
                 flipzon.deleteProduct(product.getId());

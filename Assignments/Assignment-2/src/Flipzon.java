@@ -3,12 +3,12 @@ import java.util.*;
 
 public class Flipzon {
     private final String name;
-    private final Admin admin;
+    private final User admin;
     private HashMap<String, Category> categories = new HashMap<>();
     private ArrayList<Customer> customers = new ArrayList<>();
     private int countDeals = 0;
 
-    public Flipzon(String name, Admin admin) {
+    public Flipzon(String name, User admin) {
         this.name = name;
         this.admin = admin;
     }
@@ -17,7 +17,7 @@ public class Flipzon {
         return this.name;
     }
 
-    public Admin getAdmin() {
+    public User getAdmin() {
         return this.admin;
     }
 
@@ -33,7 +33,7 @@ public class Flipzon {
         return this.categories.values();
     }
 
-    public Product getProduct(String pId) {
+    public Item getProduct(String pId) {
         for (Category category: this.getCategoryList()) {
             if (category.hasProduct(pId))
                 return category.getProducts().get(pId);
@@ -60,7 +60,7 @@ public class Flipzon {
             return this.categories.get(cId).hasProduct(pId);
     }
 
-    public void addProduct(Product product, String cId) {
+    public void addProduct(Item product, String cId) {
         this.categories.get(cId).addProduct(product);
     }
 
@@ -78,14 +78,15 @@ public class Flipzon {
     }
 
     public void setDiscounts(String pId, String cId, float[] discounts) {
-        this.categories.get(cId).getProducts().get(pId).setDiscounts(discounts);
+        Product product = (Product) this.categories.get(cId).getProducts().get(pId);
+        product.setDiscounts(discounts);
     }
 
     public void addCustomer(Customer customer) {
         this.customers.add(customer);
     }
 
-    public Customer getCustomer(String name, String password) {
+    public User getCustomer(String name, String password) {
         for (Customer customer: this.customers) {
             if (customer.matchCredentials(name, password))
                 return customer;
@@ -105,9 +106,9 @@ public class Flipzon {
                 continue;
             System.out.println("Category " + i + ": " + category.getName());
             int j = 1;
-            for (Product product: category.getProductList()) {
+            for (Item item: category.getProductList()) {
                 System.out.println("Product " + i + "." +  j + ":");
-                System.out.println(product);
+                System.out.println(item.print(3));
                 j++;
             }
             i++;
@@ -126,13 +127,13 @@ public class Flipzon {
         }
         else {
             System.out.println("The following Deals are available in " + this.name + ":");
-            for (Product product: this.categories.get("Dx0").getProductList())
-                System.out.println(product.print(status) + "\n");
+            for (Item item: this.categories.get("Dx0").getProductList())
+                System.out.println(item.print(status) + "\n");
         }
     }
 
     public void addToCart(Customer customer, String pId, String pName, int quantity) {
-        Product product = this.getProduct(pId);
+        Item product = this.getProduct(pId);
         if (product == null)
             System.out.println("Item " + pName + " does not exist!");
         else if (customer.hasInCart(product.getId())) {
@@ -152,7 +153,10 @@ public class Flipzon {
             if (quantity > product.getQuantity())
                 System.out.println("Only " + product.getQuantity() + " " + pName + "(s) are available!");
             else {
-                customer.addToCart(new Product(product, quantity));
+                if (product.isDeal())
+                    customer.addToCart(new Deal((Deal) product, quantity));
+                else
+                    customer.addToCart(new Product((Product) product, quantity));
                 System.out.println(quantity + " " + pName + "(s) added to Cart!");
             }
         }
@@ -172,24 +176,11 @@ public class Flipzon {
             + "Current Balance: Rs. " + customer.getBalance() + "/-"
         );
         System.out.println("Your order will be delivered in " + customer.getDeliveryTime() + " days!");
-        for (String pId: customer.getCart().keySet()) {
-            Product product = this.getProduct(pId);
-            if (product.isDeal()) {
-                for (Product dealProduct: product.getDealProducts())
-                    this.getProduct(dealProduct.getId()).setQuantity(dealProduct.getQuantity() - 1);
-            }
-            else {
-                product.setQuantity(product.getQuantity() - customer.getCart().get(pId).getQuantity());
-                if (product.getQuantity() <= 0) {
-                    this.deleteProduct(pId);
-                    System.out.println("Product " + product.getName() + " is no longer available! All Sold Out!");
-                }
-            }
-        }
+        this.manageProducts(customer);
         this.manageCategories();
         this.manageDeals();
         customer.emptyCart();
-        if (total > 5000)
+        if (total > 5000.0f)
             customer.addCoupons(customer.getNumCoupons());
         customer.getFreeProduct(this);
     }
@@ -198,9 +189,10 @@ public class Flipzon {
         if (!this.hasCategory("Dx0"))
             return;
         ArrayList<String> toDelete = new ArrayList<>();
-        for (Product deal: this.categories.get("Dx0").getProductList()) {
-            Product p1 = deal.getDealProducts()[0];
-            Product p2 = deal.getDealProducts()[1];
+        for (Item item: this.categories.get("Dx0").getProductList()) {
+            Deal deal = (Deal) item;
+            Product p1 = deal.getProducts()[0];
+            Product p2 = deal.getProducts()[1];
             if (p1.getQuantity() <= 0 || p2.getQuantity() <= 0) {
                 Product zero = ((p1.getQuantity() <= 0) ? p1 : p2);
                 System.out.println(
@@ -218,6 +210,33 @@ public class Flipzon {
             if (!category.getName().equals("Dx0") && category.getProducts().isEmpty()) {
                 if (Main.handleEmptyCategory(category.getId(), category.getName()))
                     this.deleteCategory(category.getId());
+            }
+        }
+    }
+
+    public void manageProducts(Customer customer) {
+        for (String pId: customer.getCart().keySet()) {
+            Item item = this.getProduct(pId);
+            if (item.isDeal()) {
+                Deal deal = (Deal) item;
+                for (Product dealProduct: deal.getProducts()) {
+                    Item product = this.getProduct(dealProduct.getId());
+                    if (product == null)
+                        continue;
+                    product.setQuantity(dealProduct.getQuantity() - 1);
+                    if (product.getQuantity() <= 0) {
+                        this.deleteProduct(product.getId());
+                        System.out.println("Product " + product.getName() + " is no longer available! All Sold Out!");
+                    }
+                }
+            }
+            else {
+                Product product = (Product) item;
+                product.setQuantity(product.getQuantity() - customer.getCart().get(pId).getQuantity());
+                if (product.getQuantity() <= 0) {
+                    this.deleteProduct(pId);
+                    System.out.println("Product " + product.getName() + " is no longer available! All Sold Out!");
+                }
             }
         }
     }
