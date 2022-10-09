@@ -3,7 +3,7 @@ public class Deal implements Item {
     private final Product[] products;
     private int quantity;
     private final float[] prices;
-    private final float[] discounts = new float[]{0.0f, 0.0f, 0.0f};
+    private final float[] discounts = new float[] {0.0f, 0.0f, 0.0f};
 
     public Deal(int num, Product p1, Product p2, float[] prices) {
         this.num = num;
